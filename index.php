@@ -56,7 +56,7 @@
 <div class="w-full md:max-w-sm min-h-screen flex flex-col md:shadow-2xl relative z-10">
 
   <!-- Mobile-width card -->
-  <div class="flex-1 flex flex-col items-center justify-end px-8 pt-16 pb-12 gap-8">
+  <div class="flex-1 flex flex-col items-center justify-end px-8 pt-16 pb-20 gap-8">
 
     <!-- Headline + subtitle -->
     <div class="text-center text-white">
