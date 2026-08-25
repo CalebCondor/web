@@ -137,7 +137,7 @@ $todayD  = (int)date('j');
     </div>
 
     <!-- Summary chip -->
-    <div id="summaryChip" class="hidden bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-800 font-semibold text-center"></div>
+    <div id="summaryChip" class="hidden bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-800 font-semibold flex items-center justify-between"></div>
 
     <button type="submit" id="continueBtn"
       class="w-full mt-auto bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold
@@ -349,7 +349,16 @@ $todayD  = (int)date('j');
       hidDate.value = selectedDate;
       if (selectedDate && hidTime.value) {
         const h = document.getElementById('hourSel').value;
-        summary.innerHTML = `<i data-lucide="calendar" class="inline w-4 h-4 -mt-0.5"></i> ${selectedDate}  <i data-lucide="clock" class="inline w-4 h-4 -mt-0.5"></i> ${String(h).padStart(2,'0')}:00 ${selectedAmpm}`;
+        summary.innerHTML = `
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="calendar" class="inline w-4 h-4 -mt-0.5"></i>
+            ${selectedDate}
+          </span>
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="clock" class="inline w-4 h-4 -mt-0.5"></i>
+            ${String(h).padStart(2,'0')}:00 ${selectedAmpm}
+          </span>
+        `;
         if (window.lucide) lucide.createIcons();
         summary.classList.remove('hidden');
       } else {
