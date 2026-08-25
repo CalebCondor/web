@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         header('Location: step3.php'); exit;
     }
-    $error = 'Please select a valid date and time.';
+    $error = 'Por favor selecciona una fecha y hora válidas.';
 }
 
 $booking = $_SESSION['booking'];
@@ -25,9 +25,9 @@ $todayM  = (int)date('n') - 1; // 0-based for JS
 $todayD  = (int)date('j');
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <title>Notarize — Date &amp; Time</title>
+  <title>Notarize — Fecha y Hora</title>
   <?php include '../_head.php'; ?>
 </head>
 <body class="bg-white md:bg-slate-200 min-h-screen flex justify-center">
@@ -35,7 +35,7 @@ $todayD  = (int)date('j');
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
     <div class="w-6"></div>
-    <span class="text-white font-extrabold text-base">Date &amp; Time</span>
+    <span class="text-white font-extrabold text-base">Fecha y Hora</span>
   </div>
 
 
@@ -58,16 +58,22 @@ $todayD  = (int)date('j');
 
     <!-- Date selection -->
     <div>
-      <p class="text-xl font-extrabold text-slate-900 mb-3">When would you like to<br>complete your service?</p>
+      <p class="text-xl font-extrabold text-slate-900 mb-3">¿Cuándo te gustaría<br>realizar tu servicio?</p>
 
       <div class="flex flex-col gap-2">
         <?php
-          $today    = date('D, M j');
-          $tomorrow = date('D, M j', strtotime('+1 day'));
+          $dias   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+          $meses  = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+          $fmt = function(string $iso) use ($dias, $meses): string {
+            $ts = strtotime($iso);
+            return $dias[(int)date('w', $ts)] . ', ' . $meses[(int)date('n', $ts) - 1] . ' ' . date('j', $ts);
+          };
+          $today    = $fmt(date('Y-m-d'));
+          $tomorrow = $fmt(date('Y-m-d', strtotime('+1 day')));
           foreach ([
-            ['today',    '⚡', 'Today',               $today],
-            ['tomorrow', '📅', 'Tomorrow',             $tomorrow],
-            ['custom',   '🗓️', 'Choose another date',  'Pick a specific date'],
+            ['today',    '⚡', 'Hoy',                  $today],
+            ['tomorrow', '📅', 'Mañana',                $tomorrow],
+            ['custom',   '🗓️', 'Elegir otra fecha',     'Selecciona una fecha específica'],
           ] as [$key, $icon, $label, $sub]):
         ?>
           <label class="date-opt flex items-center gap-3 bg-white rounded-2xl p-4 border-[1.5px] border-slate-200 cursor-pointer transition" data-key="<?= $key ?>">
@@ -93,7 +99,7 @@ $todayD  = (int)date('j');
             <button type="button" id="calNext" class="w-9 h-9 flex items-center justify-center text-blue-700 text-xl font-bold hover:bg-blue-50 rounded-xl transition">›</button>
           </div>
           <div class="grid grid-cols-7 gap-0.5 mb-1 text-center">
-            <?php foreach (['Mo','Tu','We','Th','Fr','Sa','Su'] as $d): ?>
+            <?php foreach (['Lu','Ma','Mi','Ju','Vi','Sá','Do'] as $d): ?>
               <span class="text-[10px] font-bold text-slate-400"><?= $d ?></span>
             <?php endforeach; ?>
           </div>
@@ -104,7 +110,7 @@ $todayD  = (int)date('j');
 
     <!-- Time picker -->
     <div>
-      <p class="text-sm font-bold text-slate-700 mb-2">Preferred time</p>
+      <p class="text-sm font-bold text-slate-700 mb-2">Hora y disponibilidad</p>
       <div class="flex gap-2 items-center">
         <select id="hourSel" onchange="buildTime()"
           class="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 outline-none">
@@ -124,9 +130,9 @@ $todayD  = (int)date('j');
 
     <!-- Location preference -->
       <div>
-      <p class="text-sm font-bold text-slate-700 mb-2">Where will the service take place?</p>
+      <p class="text-sm font-bold text-slate-700 mb-2">¿Dónde se realizará el servicio?</p>
       <div class="flex gap-2">
-      <?php foreach ([['notary','building-2','At notary office',0],['home','home','At my address',1]] as [$key,$icon,$lbl,$val]): ?>
+      <?php foreach ([            ['notary','building-2','En la notaría',0],['home','home','A mi domicilio',1]] as [$key,$icon,$lbl,$val]): ?>
           <label class="place-opt flex-1 flex flex-col items-center gap-1.5 bg-white rounded-2xl py-3 px-2 border-[1.5px] border-slate-200 cursor-pointer transition text-center" data-val="<?= $val ?>" data-key="<?= $key ?>">
             <input type="radio" name="_place" value="<?= $key ?>" class="sr-only" <?= $key === 'notary' ? 'checked' : '' ?> />
             <i data-lucide="<?= $icon ?>" class="place-icon w-6 h-6 text-slate-500 transition"></i>
@@ -142,13 +148,13 @@ $todayD  = (int)date('j');
     <button type="submit" id="continueBtn"
       class="w-full mt-auto bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold
              rounded-2xl py-4 shadow-lg shadow-blue-700/30 transition">
-      Continue →
+      Continuar →
     </button>
   </form>
 
   <script>
     const todayISO   = new Date().toISOString().slice(0, 10);
-    const MONTHS     = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const MONTHS     = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const nowH       = new Date().getHours();   // 0-23, current hour
     const minH24Today = nowH + 1;               // first bookable hour today
 
@@ -304,7 +310,7 @@ $todayD  = (int)date('j');
       const h24 = to24(h, selectedAmpm);
       hidTime.value = String(h24).padStart(2,'0') + ':00';
       document.getElementById('timeDisplay').textContent =
-        'Selected: ' + String(h).padStart(2,'0') + ':00 ' + selectedAmpm;
+        'Seleccionado: ' + String(h).padStart(2,'0') + ':00 ' + selectedAmpm;
       updateSummary();
     }
 
@@ -381,27 +387,27 @@ $todayD  = (int)date('j');
     <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
       <div class="flex flex-col items-center text-center mb-5">
         <i data-lucide="home" class="w-12 h-12 text-blue-700 mb-3"></i>
-        <h3 class="text-lg font-extrabold text-blue-500 mb-2">Home Visit Selected</h3>
+        <h3 class="text-lg font-extrabold text-blue-500 mb-2">Visita a Domicilio Seleccionada</h3>
         <p class="text-sm text-slate-600 leading-relaxed">
-          A home visit fee of <strong class="text-blue-700">$80.00 USD</strong> will be added
-          to the notary's consultation rate at checkout.
+          Se agregará un cargo por visita a domicilio de <strong class="text-blue-700">$80.00 USD</strong>
+          a la tarifa de consulta del notario al finalizar.
         </p>
       </div>
       <div class="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-5 flex justify-between items-center text-sm">
         <span class="text-slate-600 flex items-center gap-2">
           <i data-lucide="circle-dollar-sign" class="w-4 h-4 text-slate-500"></i>
-          Home visit surcharge
+          Cargo por visita a domicilio
         </span>
         <span class="font-extrabold text-blue-700">+ $80.00 USD</span>
       </div>
       <div class="flex gap-3">
         <button onclick="cancelHome()"
           class="flex-1 border-[1.5px] border-slate-300 text-slate-600 font-semibold rounded-xl py-3 hover:bg-slate-50 active:scale-95 transition text-sm">
-          Cancel
+          Cancelar
         </button>
         <button onclick="confirmHome()"
           class="flex-1 bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-bold rounded-xl py-3 shadow-lg shadow-blue-700/30 transition text-sm">
-          Got it, continue
+          Entendido, continuar
         </button>
       </div>
     </div>

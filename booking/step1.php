@@ -10,8 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $lat         = (float)($_POST['lat']        ?? 0);
     $lng         = (float)($_POST['lng']        ?? 0);
 
-    if (!$serviceId)    { $error = 'Please select a service.'; }
-    elseif (!$lat || !$lng) { $error = 'Location is required to find nearby notaries. Please allow location access.'; }
+    if (!$serviceId)    { $error = 'Por favor selecciona un servicio.'; }
+    elseif (!$lat || !$lng) { $error = 'Se requiere tu ubicación para encontrar notarios cercanos. Por favor permite el acceso a la ubicación.'; }
     else {
         $_SESSION['booking'] = [
             'service_id'   => $serviceId,
@@ -39,9 +39,9 @@ function svcIcon(string $n): string {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <title>Notarize — Select Service</title>
+  <title>Notarize — Seleccionar Servicio</title>
   <?php include '../_head.php'; ?>
 </head>
 <body class="bg-white md:bg-slate-200 min-h-screen flex justify-center">
@@ -49,7 +49,7 @@ function svcIcon(string $n): string {
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
     <div class="w-6"></div>
-    <span class="text-white font-extrabold text-base">Select Service</span>
+    <span class="text-white font-extrabold text-base">Seleccionar Servicio</span>
   </div>
 
 
@@ -57,13 +57,13 @@ function svcIcon(string $n): string {
   <div class="flex-1 w-full px-6 py-8">
 
     <h2 class="text-2xl font-extrabold text-slate-900 leading-tight mb-1">
-      What type of notary service<br>do you need?
+      ¿Qué tipo de servicio<br>notarial necesitas?
     </h2>
-    <p class="text-sm text-slate-500 mb-5">Select the service you would like to complete.</p>
+    <p class="text-sm text-slate-500 mb-5">Selecciona el servicio que deseas completar.</p>
 
     <!-- Location status banner -->
     <div id="locBanner" class="rounded-xl px-4 py-3 text-sm mb-5 border bg-yellow-50 border-yellow-200 text-yellow-800">
-      ⏳ Requesting location access…
+      ⏳ Solicitando acceso a la ubicación…
     </div>
 
     <?php if ($error): ?>
@@ -78,7 +78,7 @@ function svcIcon(string $n): string {
       <input type="hidden" id="hidName" name="service_name" value="" />
 
       <?php if (empty($services)): ?>
-        <p class="text-center text-slate-400 py-10 text-sm">No services available right now.</p>
+        <p class="text-center text-slate-400 py-10 text-sm">No hay servicios disponibles en este momento.</p>
       <?php else: ?>
         <?php foreach ($services as $svc):
           $id   = $svc['id_servicio'] ?? 0;
@@ -110,7 +110,7 @@ function svcIcon(string $n): string {
         class="w-full mt-2 bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold
                rounded-2xl py-4 shadow-lg shadow-blue-700/30 transition
                disabled:opacity-40 disabled:pointer-events-none">
-        Continue →
+        Continuar →
       </button>
     </form>
   </div>
@@ -127,7 +127,7 @@ function svcIcon(string $n): string {
 
     // Geolocation
     if (!navigator.geolocation) {
-      banner.textContent = '⚠️ Geolocation not supported by your browser.';
+      banner.textContent = '⚠️ Tu navegador no soporta geolocalización.';
       banner.className = 'rounded-xl px-4 py-3 text-sm mb-5 border bg-red-50 border-red-200 text-red-600';
     } else {
       navigator.geolocation.getCurrentPosition(
@@ -135,12 +135,12 @@ function svcIcon(string $n): string {
           hidLat.value = pos.coords.latitude;
           hidLng.value = pos.coords.longitude;
           locOk = true;
-          banner.textContent = '📍 Location detected — ready to search.';
+          banner.textContent = '📍 Ubicación detectada — listo para buscar.';
           banner.className = 'rounded-xl px-4 py-3 text-sm mb-5 border bg-green-50 border-green-200 text-green-700';
           checkReady();
         },
         () => {
-          banner.textContent = '📍 Location access denied. Please enable it in your browser settings.';
+          banner.textContent = '📍 Acceso a la ubicación denegado. Por favor habilítalo en la configuración de tu navegador.';
           banner.className = 'rounded-xl px-4 py-3 text-sm mb-5 border bg-red-50 border-red-200 text-red-600';
         },
         { timeout: 10000 }

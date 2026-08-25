@@ -10,18 +10,18 @@ $userLng  = (float)($b['lng']      ?? 0);
 $ntLat    = (float)($notary['lat'] ?? $notary['_lat'] ?? 0);
 $ntLng    = (float)($notary['lng'] ?? $notary['_lng'] ?? 0);
 $address  = $notary['direccion']   ?? '';
-$ntName   = $notary['nombre']      ?? 'Notary';
+$ntName   = $notary['nombre']      ?? 'Notario';
 $service  = htmlspecialchars($b['service_name'] ?? '');
 $date     = htmlspecialchars($b['date']         ?? '');
 $time     = htmlspecialchars($b['time']         ?? '');
 $domicilio = (int)($b['domicilio'] ?? 0);
-$modLabel = $domicilio ? '🏠 Home visit' : '🏛️ At notary office';
+$modLabel = $domicilio ? '🏠 Visita a domicilio' : '🏛️ En la notaría';
 $invoice  = $b['pago']['numero_factura'] ?? $b['pago']['invoice'] ?? null;
 $mapsUrl  = "https://www.google.com/maps/dir/?api=1&origin={$userLat},{$userLng}&destination={$ntLat},{$ntLng}&travelmode=driving";
 ?><!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <title>Notarize — Route to Notary</title>
+  <title>Notarize — Ruta al Notario</title>
   <?php include '../_head.php'; ?>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -35,10 +35,10 @@ $mapsUrl  = "https://www.google.com/maps/dir/?api=1&origin={$userLat},{$userLng}
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
     <a href="step5.php" class="text-blue-300 text-xl leading-none">‹</a>
-    <span class="text-white font-extrabold text-base flex-1">Route to Notary</span>
+    <span class="text-white font-extrabold text-base flex-1">Ruta al Notario</span>
     <a href="<?= htmlspecialchars($mapsUrl) ?>" target="_blank"
        class="bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-full hover:bg-white/30 transition whitespace-nowrap">
-      Open Maps
+      Abrir Mapas
     </a>
   </div>
 
@@ -58,8 +58,8 @@ $mapsUrl  = "https://www.google.com/maps/dir/?api=1&origin={$userLat},{$userLng}
         </svg>
       </div>
       <div>
-        <p class="font-extrabold text-slate-900 text-sm">Appointment confirmed!</p>
-        <p class="text-xs text-slate-500 mt-0.5">Head to the notary at the indicated time.</p>
+        <p class="font-extrabold text-slate-900 text-sm">¡Cita confirmada!</p>
+        <p class="text-xs text-slate-500 mt-0.5">Dirígete al notario a la hora indicada.</p>
       </div>
     </div>
 
@@ -78,20 +78,20 @@ $mapsUrl  = "https://www.google.com/maps/dir/?api=1&origin={$userLat},{$userLng}
       </div>
       <div class="px-4 py-3 grid grid-cols-2 gap-x-4 gap-y-2.5">
         <div>
-          <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Service</p>
+          <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Servicio</p>
           <p class="font-bold text-slate-900 text-xs mt-0.5 truncate"><?= $service ?></p>
         </div>
         <div>
-          <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Appointment</p>
+          <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Cita</p>
           <p class="font-bold text-slate-900 text-xs mt-0.5"><?= $date ?> <?= $time ?></p>
         </div>
         <div>
-          <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Location</p>
+          <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Ubicación</p>
           <p class="font-bold text-slate-900 text-xs mt-0.5"><?= $domicilio ? '🏠' : '🏛️' ?> <?= htmlspecialchars($modLabel) ?></p>
         </div>
         <?php if ($invoice): ?>
         <div>
-          <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Invoice</p>
+          <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Factura</p>
           <p class="font-extrabold text-blue-700 text-xs mt-0.5"><?= htmlspecialchars($invoice) ?></p>
         </div>
         <?php endif; ?>
@@ -102,11 +102,11 @@ $mapsUrl  = "https://www.google.com/maps/dir/?api=1&origin={$userLat},{$userLng}
     <div class="flex gap-3 pb-2">
       <a href="<?= htmlspecialchars($mapsUrl) ?>" target="_blank"
         class="flex-1 text-center border-[1.5px] border-blue-700 text-blue-700 font-bold rounded-2xl py-3.5 text-sm hover:bg-blue-50 active:scale-95 transition">
-        🗺️ Open in Maps
+        🗺️ Abrir en Mapas
       </a>
       <a href="../step1.php"
         class="flex-1 text-center bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-bold rounded-2xl py-3.5 text-sm shadow-lg shadow-blue-700/30 transition">
-        Upload Doc →
+        Subir Documento →
       </a>
     </div>
 
@@ -128,10 +128,10 @@ const pin = (color, sz) => L.divIcon({
   iconSize:[sz,sz], iconAnchor:[sz/2,sz/2], className:''
 });
 
-L.marker([userLat,userLng],{icon:pin('#22c55e',16)}).addTo(map).bindPopup('<b>Your location</b>');
+L.marker([userLat,userLng],{icon:pin('#22c55e',16)}).addTo(map).bindPopup('<b>Tu ubicación</b>');
 
 if (ntLat && ntLng) {
-  L.marker([ntLat,ntLng],{icon:pin('#1d4ed8',20)}).addTo(map).bindPopup('<b>Notary office</b>');
+  L.marker([ntLat,ntLng],{icon:pin('#1d4ed8',20)}).addTo(map).bindPopup('<b>Notaría</b>');
 
   // Real driving route via OSRM — free, no API key needed
   fetch(`https://router.project-osrm.org/route/v1/driving/${userLng},${userLat};${ntLng},${ntLat}?overview=full&geometries=geojson`)
@@ -147,7 +147,7 @@ if (ntLat && ntLng) {
         const km   = (route.distance / 1000).toFixed(1);
         const mins = Math.round(route.duration / 60);
         const bar  = document.getElementById('routeBar');
-        bar.textContent = `🚗  ${km} km  ·  ~${mins} min driving`;
+        bar.textContent = `🚗  ${km} km  ·  ~${mins} min en auto`;
         bar.classList.remove('hidden');
       } else { fallback(); }
     })

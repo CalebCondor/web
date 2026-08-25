@@ -33,17 +33,17 @@ $qs = http_build_query([
 ]);
 $res      = api_json('GET', "/notarias/buscar?$qs");
 $notaries = $res['success'] ? ($res['data'] ?? []) : [];
-$apiErr   = $res['success'] ? '' : ($res['message'] ?? 'Could not load notaries.');
+    $apiErr   = $res['success'] ? '' : ($res['message'] ?? 'No se pudieron cargar los notarios.');
 
 function distLabel($km): string {
     if ($km === null) return '?';
-    return $km < 1 ? round($km * 1000).' m away' : number_format($km, 1).' km away';
+    return $km < 1 ? round($km * 1000).' m de distancia' : number_format($km, 1).' km de distancia';
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <title>Notarize — Available Notaries</title>
+  <title>Notarize — Notarios Disponibles</title>
   <?php include '../_head.php'; ?>
 </head>
 <body class="bg-white md:bg-slate-200 min-h-screen flex justify-center">
@@ -51,7 +51,7 @@ function distLabel($km): string {
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
     <div class="w-6"></div>
-    <span class="text-white font-extrabold text-base">Available Notaries</span>
+    <span class="text-white font-extrabold text-base">Notarios Disponibles</span>
   </div>
 
 
@@ -63,7 +63,7 @@ function distLabel($km): string {
       '🏛️ ' . ($b['service_name'] ?? ''),
       '📅 ' . ($b['date']         ?? ''),
       '🕐 ' . ($b['time']         ?? ''),
-      $domicilio ? '🏠 At your address' : '🏛️ At notary office',
+      $domicilio ? '🏠 A tu domicilio' : '🏛️ En la notaría',
     ] as $chip): ?>
       <span class="<?= $domicilio && strpos($chip,'🏠') !== false ? 'bg-green-100 text-green-800 border-green-200' : 'bg-slate-100 text-slate-600 border-slate-200' ?>
                    border text-xs font-semibold rounded-full px-3 py-1">
@@ -76,7 +76,7 @@ function distLabel($km): string {
   <!-- Radius filter -->
   <div class="bg-white border-b border-slate-200 py-2.5">
     <div class="max-w-sm mx-auto px-4 flex items-center gap-2">
-    <span class="text-xs font-bold text-slate-500 mr-1">Radius:</span>
+    <span class="text-xs font-bold text-slate-500 mr-1">Radio:</span>
     <?php foreach ($RADII as $r): ?>
       <a href="?radius=<?= $r ?>"
         class="px-3 py-1.5 rounded-full text-xs font-bold transition
@@ -88,8 +88,8 @@ function distLabel($km): string {
   </div>
 
   <div class="flex-1 w-full max-w-sm mx-auto px-4 py-5">
-    <h2 class="text-lg font-extrabold text-slate-900 mb-1">Available Notaries</h2>
-    <p class="text-sm text-slate-500 mb-4">Select the most convenient option for you.</p>
+    <h2 class="text-lg font-extrabold text-slate-900 mb-1">Notarios Disponibles</h2>
+    <p class="text-sm text-slate-500 mb-4">Selecciona la opción más conveniente para ti.</p>
 
     <?php if ($apiErr): ?>
       <div class="flex flex-col items-center py-16 gap-3">
@@ -100,8 +100,8 @@ function distLabel($km): string {
     <?php elseif (empty($notaries)): ?>
       <div class="flex flex-col items-center py-16 gap-3">
         <span class="text-5xl">🔍</span>
-        <p class="font-bold text-slate-700">No notaries found</p>
-        <p class="text-sm text-slate-400">Try increasing the search radius above.</p>
+        <p class="font-bold text-slate-700">No se encontraron notarios</p>
+        <p class="text-sm text-slate-400">Intenta aumentar el radio de búsqueda arriba.</p>
       </div>
 
     <?php else: ?>
@@ -134,9 +134,9 @@ function distLabel($km): string {
                     🕐 <?= substr($n['horario_dia']['hora_inicio'] ?? '', 0, 5) ?>–<?= substr($n['horario_dia']['hora_fin'] ?? '', 0, 5) ?>
                   </span>
                 <?php endif; ?>
-                <span class="bg-green-50 border border-green-200 text-green-700 text-[10px] font-bold rounded-full px-2 py-0.5">✓ Available</span>
+                <span class="bg-green-50 border border-green-200 text-green-700 text-[10px] font-bold rounded-full px-2 py-0.5">✓ Disponible</span>
                 <?php if ($n['tramites_domicilio'] ?? false): ?>
-                  <span class="bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full px-2 py-0.5">🏠 Home</span>
+                  <span class="bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full px-2 py-0.5">🏠 A domicilio</span>
                 <?php endif; ?>
               </div>
             </div>
@@ -156,15 +156,15 @@ function distLabel($km): string {
        onclick="if(event.target===this) closeModal()">
     <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
       <div class="bg-blue-700 px-5 py-3.5">
-        <p class="text-white font-extrabold text-base">Price Summary</p>
+        <p class="text-white font-extrabold text-base">Resumen del Precio</p>
       </div>
       <div class="px-5 py-4 flex flex-col gap-2.5 text-sm">
         <div class="flex justify-between">
-          <span class="text-slate-500">Notary fee</span>
+          <span class="text-slate-500">Tarifa del notario</span>
           <span id="mBase" class="font-semibold text-slate-900">—</span>
         </div>
         <div id="mHomeFee" class="hidden flex justify-between">
-          <span class="text-slate-500">🏠 Home visit fee</span>
+          <span class="text-slate-500">🏠 Cargo por visita a domicilio</span>
           <span id="mHomeFeeVal" class="font-semibold text-orange-600">—</span>
         </div>
         <div class="flex justify-between pt-2.5 border-t border-slate-200">
@@ -181,7 +181,7 @@ function distLabel($km): string {
           <input type="hidden" name="notary_json" id="modalNotaryField" value="" />
           <button type="submit" onclick="document.getElementById('modalNotaryField').value=document.getElementById('hidNotary').value"
             class="w-full bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold rounded-2xl py-3.5 shadow-lg shadow-blue-700/30 transition text-sm">
-            Yes, continue →
+            Sí, continuar →
           </button>
         </form>
       </div>

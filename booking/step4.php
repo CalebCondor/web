@@ -16,7 +16,7 @@ $total     = $fee + $homeFee;
 $service   = $b['service_name'] ?? '';
 $date      = $b['date']         ?? '';
 $time      = $b['time']         ?? '';
-$modalidad = $domicilio ? 'Home visit' : 'At notary office';
+$modalidad = $domicilio ? 'Visita a domicilio' : 'En la notaría';
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -99,9 +99,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <title>Notarize — Payment</title>
+  <title>Notarize — Pago</title>
   <?php include '../_head.php'; ?>
 </head>
 <body class="bg-white md:bg-slate-200 min-h-screen flex justify-center">
@@ -109,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
     <div class="w-6"></div>
-    <span class="text-white font-extrabold text-base flex-1">Payment</span>
+    <span class="text-white font-extrabold text-base flex-1">Pago</span>
     <span class="text-white/50 text-xs">4/5</span>
   </div>
 
@@ -120,8 +120,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div>
-      <h1 class="text-2xl font-extrabold text-slate-900 mb-1">Payment Summary</h1>
-      <p class="text-sm text-slate-500">Review the details before continuing</p>
+      <h1 class="text-2xl font-extrabold text-slate-900 mb-1">Resumen del Pago</h1>
+      <p class="text-sm text-slate-500">Revisa los detalles antes de continuar</p>
     </div>
 
     <?php if ($error): ?>
@@ -133,13 +133,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Service detail card -->
     <div class="bg-white rounded-2xl border border-slate-200">
       <div class="px-4 pt-4 pb-2">
-        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Service Details</p>
+        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Detalles del Servicio</p>
         <?php foreach ([
-          ['Notary',    'Notary #1'],
-          ['Service',   $service],
-          ['Date',      $date],
-          ['Time',      $time],
-          ['Location',  $modalidad],
+          ['Notario',    'Notario #1'],
+          ['Servicio',   $service],
+          ['Fecha',      $date],
+          ['Hora',       $time],
+          ['Ubicación',  $modalidad],
         ] as [$lbl, $val]): ?>
           <div class="flex justify-between items-center py-2.5 border-b border-slate-100 last:border-0">
             <span class="text-sm text-slate-400"><?= htmlspecialchars($lbl) ?></span>
@@ -152,19 +152,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Price summary card -->
     <div class="bg-white rounded-2xl border border-slate-200">
       <div class="px-4 pt-4 pb-3">
-        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Summary</p>
+        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Resumen</p>
           <div class="flex justify-between items-center py-2.5 border-b border-slate-100">
-          <span class="text-sm text-slate-400">Product price</span>
+          <span class="text-sm text-slate-400">Precio del producto</span>
           <span class="text-sm font-semibold text-slate-900"><?= $currency ?> <?= number_format($fee, 2) ?></span>
         </div>
         <?php if ($homeFee): ?>
           <div class="flex justify-between items-center py-2.5 border-b border-slate-100">
-            <span class="text-sm text-slate-400">🏠 Home visit fee</span>
+            <span class="text-sm text-slate-400">🏠 Cargo por visita a domicilio</span>
             <span class="text-sm font-semibold text-slate-900"><?= $currency ?> <?= number_format($homeFee, 2) ?></span>
           </div>
         <?php endif; ?>
         <div class="flex justify-between items-center pt-3">
-          <span class="font-extrabold text-slate-900">Total due</span>
+          <span class="font-extrabold text-slate-900">Total a pagar</span>
           <span class="text-xl font-extrabold text-blue-700"><?= $currency ?> <?= number_format($total, 2) ?></span>
         </div>
       </div>
@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Payment method card (demo) -->
     <div class="bg-white rounded-2xl border border-slate-200">
       <div class="px-4 pt-4 pb-4">
-        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Payment Method</p>
+        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Método de Pago</p>
         <div class="flex items-center gap-3">
           <div class="w-12 h-8 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-md flex items-center justify-center shrink-0">
             <span class="text-white text-[10px] font-extrabold">VISA</span>
@@ -194,12 +194,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
        style="max-width:inherit">
     <a href="step3.php"
       class="px-5 py-4 border-[1.5px] border-slate-300 text-slate-600 font-semibold rounded-2xl text-sm hover:bg-slate-50 active:scale-95 transition whitespace-nowrap">
-      ← Back
+      ← Atrás
     </a>
     <form method="POST" class="flex-1">
       <button type="submit"
         class="w-full bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold rounded-2xl py-4 shadow-lg shadow-blue-700/30 transition text-sm">
-        Pay <?= $currency ?> <?= number_format($total, 2) ?> →
+        Pagar <?= $currency ?> <?= number_format($total, 2) ?> →
       </button>
     </form>
   </div>
