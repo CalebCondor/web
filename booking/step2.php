@@ -119,13 +119,13 @@ $todayD  = (int)date('j');
     </div>
 
     <!-- Location preference -->
-    <div>
+      <div>
       <p class="text-sm font-bold text-slate-700 mb-2">Where will the service take place?</p>
       <div class="flex gap-2">
-      <?php foreach ([['notary','🏛️','At notary office',0],['home','🏠','At my address',1]] as [$key,$icon,$lbl,$val]): ?>
+      <?php foreach ([['notary','building-2','At notary office',0],['home','home','At my address',1]] as [$key,$icon,$lbl,$val]): ?>
           <label class="place-opt flex-1 flex flex-col items-center gap-1.5 bg-white rounded-2xl py-3 px-2 border-[1.5px] border-slate-200 cursor-pointer transition text-center" data-val="<?= $val ?>" data-key="<?= $key ?>">
             <input type="radio" name="_place" value="<?= $key ?>" class="sr-only" <?= $key === 'notary' ? 'checked' : '' ?> />
-            <span class="text-xl"><?= $icon ?></span>
+            <i data-lucide="<?= $icon ?>" class="w-6 h-6 text-slate-700"></i>
             <span class="text-xs font-semibold text-slate-700"><?= $lbl ?></span>
           </label>
         <?php endforeach; ?>
