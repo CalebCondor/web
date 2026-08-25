@@ -1,0 +1,10 @@
+.git
+.gitignore
+.DS_Store
+node_modules
+*.log
+.idea
+.vscode
+docker-compose.override.yml
+README.md
+_tmp

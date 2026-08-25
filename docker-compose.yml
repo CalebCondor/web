@@ -1,0 +1,23 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: booking-web:latest
+    container_name: booking-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      API_BASE: ${API_BASE:-https://islandmedpr.com/notarize/api/v1}
+      APP_BASE: ${APP_BASE:-/}
+    volumes:
+      - sessions:/var/lib/php/sessions
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  sessions:

@@ -1,0 +1,248 @@
+<?php
+require_once '../config.php';
+session_init();
+$b = $_SESSION['booking'] ?? [];
+if (empty($b['service_id']) || empty($b['date'])) { header('Location: step1.php'); exit; }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $notaryJson = $_POST['notary_json'] ?? '';
+    $notary     = json_decode($notaryJson, true);
+    if ($notary) {
+        $_SESSION['booking']['notary']   = $notary;
+        // Store original base fee separately so step4 always has the unmodified price
+        $_SESSION['booking']['fee_base'] = (float)($notary['tarifa_consulta'] ?? 0);
+        // Auth check happens here: redirect to login if not logged in
+        $dest = empty($_SESSION['client_token']) ? '../auth.php' : 'step4.php';
+        header("Location: $dest"); exit;
+    }
+}
+
+$radius     = (float)($_GET['radius'] ?? $b['radius'] ?? 5);
+$RADII      = [0.5, 1, 2, 5, 10];
+$HOME_FEE   = 80;
+$domicilio  = (int)($b['domicilio'] ?? 0);
+
+// Search notaries via API
+$qs = http_build_query([
+    'id_servicio' => $b['service_id'],
+    'fecha'       => $b['date'],
+    'lat'         => $b['lat'],
+    'lng'         => $b['lng'],
+    'radio'       => $radius,
+    'domicilio'   => $domicilio,
+]);
+$res      = api_json('GET', "/notarias/buscar?$qs");
+$notaries = $res['success'] ? ($res['data'] ?? []) : [];
+$apiErr   = $res['success'] ? '' : ($res['message'] ?? 'Could not load notaries.');
+
+function distLabel($km): string {
+    if ($km === null) return '?';
+    return $km < 1 ? round($km * 1000).' m away' : number_format($km, 1).' km away';
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Notarize — Available Notaries</title>
+  <?php include '../_head.php'; ?>
+</head>
+<body class="bg-white md:bg-slate-200 min-h-screen flex justify-center">
+<div class="w-full md:max-w-sm min-h-screen bg-slate-50 flex flex-col md:shadow-2xl relative overflow-hidden">
+
+  <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
+    <div class="w-6"></div>
+    <span class="text-white font-extrabold text-base">Available Notaries</span>
+  </div>
+
+
+
+  <!-- Context strip -->
+  <div class="bg-white border-b border-slate-200 py-2.5">
+    <div class="max-w-sm mx-auto px-4 flex flex-wrap gap-2">
+    <?php foreach ([
+      '🏛️ ' . ($b['service_name'] ?? ''),
+      '📅 ' . ($b['date']         ?? ''),
+      '🕐 ' . ($b['time']         ?? ''),
+      $domicilio ? '🏠 At your address' : '🏛️ At notary office',
+    ] as $chip): ?>
+      <span class="<?= $domicilio && strpos($chip,'🏠') !== false ? 'bg-green-100 text-green-800 border-green-200' : 'bg-slate-100 text-slate-600 border-slate-200' ?>
+                   border text-xs font-semibold rounded-full px-3 py-1">
+        <?= htmlspecialchars($chip) ?>
+      </span>
+    <?php endforeach; ?>
+    </div>
+  </div>
+
+  <!-- Radius filter -->
+  <div class="bg-white border-b border-slate-200 py-2.5">
+    <div class="max-w-sm mx-auto px-4 flex items-center gap-2">
+    <span class="text-xs font-bold text-slate-500 mr-1">Radius:</span>
+    <?php foreach ($RADII as $r): ?>
+      <a href="?radius=<?= $r ?>"
+        class="px-3 py-1.5 rounded-full text-xs font-bold transition
+               <?= $r == $radius ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-blue-100' ?>">
+        <?= $r < 1 ? ($r * 1000).' m' : $r.' km' ?>
+      </a>
+    <?php endforeach; ?>
+    </div>
+  </div>
+
+  <div class="flex-1 w-full max-w-sm mx-auto px-4 py-5">
+    <h2 class="text-lg font-extrabold text-slate-900 mb-1">Available Notaries</h2>
+    <p class="text-sm text-slate-500 mb-4">Select the most convenient option for you.</p>
+
+    <?php if ($apiErr): ?>
+      <div class="flex flex-col items-center py-16 gap-3">
+        <span class="text-4xl">⚠️</span>
+        <p class="text-red-500 text-sm text-center"><?= htmlspecialchars($apiErr) ?></p>
+      </div>
+
+    <?php elseif (empty($notaries)): ?>
+      <div class="flex flex-col items-center py-16 gap-3">
+        <span class="text-5xl">🔍</span>
+        <p class="font-bold text-slate-700">No notaries found</p>
+        <p class="text-sm text-slate-400">Try increasing the search radius above.</p>
+      </div>
+
+    <?php else: ?>
+      <form method="POST" class="flex flex-col gap-3" id="notaryForm">
+        <input type="hidden" id="hidNotary" name="notary_json" value="" />
+
+        <?php foreach ($notaries as $i => $n):
+          $fee  = (float)($n['tarifa_consulta'] ?? 0);
+          $total = $domicilio ? $fee + $HOME_FEE : $fee;
+          $dist  = distLabel($n['distancia_km'] ?? null);
+          $avail = !empty($n['horario_dia']);
+          $json  = htmlspecialchars(json_encode($n), ENT_QUOTES);
+        ?>
+          <label class="notary-card flex items-center gap-3 bg-white rounded-2xl p-4 border-[1.5px] border-slate-200 cursor-pointer transition"
+                 data-json='<?= $json ?>'>
+            <input type="radio" name="_notary" value="<?= $i ?>" class="sr-only" required />
+
+            <div class="n-badge w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-extrabold text-slate-500 shrink-0 transition">
+              <?= $i + 1 ?>
+            </div>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-center mb-1.5">
+                <span class="text-sm font-bold text-slate-700"><?= htmlspecialchars($dist) ?></span>
+                <span class="text-sm font-extrabold text-slate-900"><?= $n['moneda'] ?? 'USD' ?> <?= number_format($fee, 2) ?></span>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                <?php if ($avail): ?>
+                  <span class="bg-green-50 border border-green-200 text-green-700 text-[10px] font-bold rounded-full px-2 py-0.5">
+                    🕐 <?= substr($n['horario_dia']['hora_inicio'] ?? '', 0, 5) ?>–<?= substr($n['horario_dia']['hora_fin'] ?? '', 0, 5) ?>
+                  </span>
+                <?php endif; ?>
+                <span class="bg-green-50 border border-green-200 text-green-700 text-[10px] font-bold rounded-full px-2 py-0.5">✓ Available</span>
+                <?php if ($n['tramites_domicilio'] ?? false): ?>
+                  <span class="bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full px-2 py-0.5">🏠 Home</span>
+                <?php endif; ?>
+              </div>
+            </div>
+
+            <div class="n-radio w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0">
+              <div class="n-dot w-2.5 h-2.5 rounded-full bg-blue-700 hidden"></div>
+            </div>
+          </label>
+        <?php endforeach; ?>
+
+      </form>
+    <?php endif; ?>
+  </div>
+
+  <!-- Price Summary Modal -->
+  <div id="priceModal" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-black/50 px-4 pb-6"
+       onclick="if(event.target===this) closeModal()">
+    <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+      <div class="bg-blue-700 px-5 py-3.5">
+        <p class="text-white font-extrabold text-base">Price Summary</p>
+      </div>
+      <div class="px-5 py-4 flex flex-col gap-2.5 text-sm">
+        <div class="flex justify-between">
+          <span class="text-slate-500">Notary fee</span>
+          <span id="mBase" class="font-semibold text-slate-900">—</span>
+        </div>
+        <div id="mHomeFee" class="hidden flex justify-between">
+          <span class="text-slate-500">🏠 Home visit fee</span>
+          <span id="mHomeFeeVal" class="font-semibold text-orange-600">—</span>
+        </div>
+        <div class="flex justify-between pt-2.5 border-t border-slate-200">
+          <span class="font-extrabold text-slate-900">Total</span>
+          <span id="mTotal" class="font-extrabold text-blue-700 text-lg">—</span>
+        </div>
+      </div>
+      <div class="flex gap-3 px-5 pb-5">
+        <button type="button" onclick="closeModal()"
+          class="flex-1 border-[1.5px] border-slate-300 text-slate-600 font-semibold rounded-2xl py-3.5 hover:bg-slate-50 active:scale-95 transition text-sm">
+          No
+        </button>
+        <form method="POST" class="flex-1">
+          <input type="hidden" name="notary_json" id="modalNotaryField" value="" />
+          <button type="submit" onclick="document.getElementById('modalNotaryField').value=document.getElementById('hidNotary').value"
+            class="w-full bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold rounded-2xl py-3.5 shadow-lg shadow-blue-700/30 transition text-sm">
+            Yes, continue →
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const hidNotary   = document.getElementById('hidNotary');
+    const HOME_FEE    = <?= $HOME_FEE ?>;
+    const domicilio   = <?= $domicilio ?>;
+
+    document.querySelectorAll('.notary-card input').forEach(radio => {
+      radio.addEventListener('change', () => {
+        // Reset all cards
+        document.querySelectorAll('.notary-card').forEach(c => {
+          c.classList.remove('border-blue-600','bg-blue-50');
+          c.querySelector('.n-badge').classList.remove('bg-blue-700','text-white');
+          c.querySelector('.n-badge').classList.add('bg-slate-100','text-slate-500');
+          c.querySelector('.n-radio').classList.remove('border-blue-700');
+          c.querySelector('.n-dot').classList.add('hidden');
+        });
+        // Highlight selected card
+        const card = radio.closest('.notary-card');
+        card.classList.add('border-blue-600','bg-blue-50');
+        card.querySelector('.n-badge').classList.add('bg-blue-700','text-white');
+        card.querySelector('.n-badge').classList.remove('bg-slate-100','text-slate-500');
+        card.querySelector('.n-radio').classList.add('border-blue-700');
+        card.querySelector('.n-dot').classList.remove('hidden');
+
+        const n    = JSON.parse(card.dataset.json);
+        const fee  = parseFloat(n.tarifa_consulta ?? 0);
+        const cur  = n.moneda ?? 'USD';
+        const total = domicilio ? fee + HOME_FEE : fee;
+
+        // Populate modal
+        document.getElementById('mBase').textContent  = cur + ' ' + fee.toFixed(2);
+        document.getElementById('mTotal').textContent = cur + ' ' + total.toFixed(2);
+        document.getElementById('mHomeFee').classList.toggle('hidden', !domicilio);
+        document.getElementById('mHomeFeeVal').textContent = cur + ' ' + HOME_FEE.toFixed(2);
+
+        hidNotary.value = card.dataset.json;
+        document.getElementById('priceModal').classList.remove('hidden');
+      });
+    });
+
+    function closeModal() {
+      document.getElementById('priceModal').classList.add('hidden');
+      // Deselect the notary card
+      document.querySelectorAll('.notary-card').forEach(c => {
+        c.classList.remove('border-blue-600','bg-blue-50');
+        c.querySelector('.n-badge').classList.remove('bg-blue-700','text-white');
+        c.querySelector('.n-badge').classList.add('bg-slate-100','text-slate-500');
+        c.querySelector('.n-radio').classList.remove('border-blue-700');
+        c.querySelector('.n-dot').classList.add('hidden');
+      });
+      document.querySelectorAll('.notary-card input').forEach(r => r.checked = false);
+      hidNotary.value = '';
+    }
+  </script>
+
+  <?php include '../_nav.php'; ?>
+</div>
+</body>
+</html>
