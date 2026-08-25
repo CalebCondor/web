@@ -129,8 +129,8 @@ $todayD  = (int)date('j');
       <?php foreach ([['notary','building-2','At notary office',0],['home','home','At my address',1]] as [$key,$icon,$lbl,$val]): ?>
           <label class="place-opt flex-1 flex flex-col items-center gap-1.5 bg-white rounded-2xl py-3 px-2 border-[1.5px] border-slate-200 cursor-pointer transition text-center" data-val="<?= $val ?>" data-key="<?= $key ?>">
             <input type="radio" name="_place" value="<?= $key ?>" class="sr-only" <?= $key === 'notary' ? 'checked' : '' ?> />
-            <i data-lucide="<?= $icon ?>" class="w-6 h-6 text-slate-700"></i>
-            <span class="text-xs font-semibold text-slate-700"><?= $lbl ?></span>
+            <i data-lucide="<?= $icon ?>" class="place-icon w-6 h-6 text-slate-500 transition"></i>
+            <span class="place-label text-xs font-semibold text-slate-700 transition"><?= $lbl ?></span>
           </label>
         <?php endforeach; ?>
       </div>
@@ -317,8 +317,18 @@ $todayD  = (int)date('j');
         if (card.dataset.key === 'home') {
           document.getElementById('homeModal').classList.remove('hidden');
         }
-        document.querySelectorAll('.place-opt').forEach(c => c.classList.remove('border-blue-600','bg-blue-50'));
+        document.querySelectorAll('.place-opt').forEach(c => {
+          c.classList.remove('border-blue-600','bg-blue-50');
+          c.querySelector('.place-icon').classList.remove('text-blue-700');
+          c.querySelector('.place-icon').classList.add('text-slate-500');
+          c.querySelector('.place-label').classList.remove('text-blue-700');
+          c.querySelector('.place-label').classList.add('text-slate-700');
+        });
         card.classList.add('border-blue-600','bg-blue-50');
+        card.querySelector('.place-icon').classList.remove('text-slate-500');
+        card.querySelector('.place-icon').classList.add('text-blue-700');
+        card.querySelector('.place-label').classList.remove('text-slate-700');
+        card.querySelector('.place-label').classList.add('text-blue-700');
         hidDom.value = card.dataset.val;
         updateSummary();
       });
