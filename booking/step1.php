@@ -87,16 +87,16 @@ function svcIcon(string $n): string {
           $icon  = svcIcon($svc['nombre'] ?? '');
           $first = $i === 0;
           $cardCls = $first
-            ? 'svc-card relative flex items-center gap-4 bg-gradient-to-r from-blue-50 to-white rounded-2xl p-4 border-[1.5px] border-blue-300 cursor-pointer transition select-none'
+            ? 'svc-card relative flex items-center gap-4 bg-gradient-to-br from-blue-50 via-white to-white rounded-2xl p-4 border-[1.5px] border-blue-300 border-l-[5px] border-l-blue-700 shadow-md cursor-pointer transition select-none'
             : 'svc-card flex items-center gap-4 bg-white rounded-2xl p-4 border-[1.5px] border-slate-200 cursor-pointer transition select-none';
         ?>
           <label class="<?= $cardCls ?>" data-first="<?= $first ? '1' : '0' ?>">
-            <?php if ($first): ?>
-              <span class="absolute -top-2 left-4 bg-blue-700 text-white text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-full shadow-md">Más popular</span>
-            <?php endif; ?>
             <input type="radio" name="service_id" value="<?= $id ?>" class="sr-only"
                    data-name="<?= $name ?>" required />
-            <div class="icon-wrap w-12 h-12 rounded-xl <?= $first ? 'bg-blue-100' : 'bg-slate-100' ?> flex items-center justify-center text-2xl shrink-0 transition">
+            <?php if ($first): ?>
+              <i data-lucide="star" class="absolute top-3 right-3 w-4 h-4 text-yellow-500 fill-yellow-500"></i>
+            <?php endif; ?>
+            <div class="icon-wrap <?= $first ? 'w-14 h-14' : 'w-12 h-12' ?> rounded-xl <?= $first ? 'bg-blue-100' : 'bg-slate-100' ?> flex items-center justify-center text-2xl shrink-0 transition">
               <?= $icon ?>
             </div>
             <div class="flex-1 min-w-0">
