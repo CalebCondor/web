@@ -62,8 +62,9 @@ function svcIcon(string $n): string {
     <p class="text-sm text-slate-500 mb-5">Selecciona el servicio que deseas completar.</p>
 
     <!-- Location status banner -->
-    <div id="locBanner" class="rounded-xl px-4 py-3 text-sm mb-5 border bg-yellow-50 border-yellow-200 text-yellow-800">
-      ⏳ Solicitando acceso a la ubicación…
+    <div id="locBanner" class="rounded-xl px-4 py-3 text-sm mb-5 border bg-yellow-50 border-yellow-200 text-yellow-800 flex items-center gap-2">
+      <span id="locMsg" class="flex-1">⏳ Solicitando acceso a la ubicación…</span>
+      <button type="button" id="locRetry" class="hidden font-bold underline whitespace-nowrap" onclick="requestLocation()">Reintentar</button>
     </div>
 
     <?php if ($error): ?>
@@ -127,31 +128,62 @@ function svcIcon(string $n): string {
     const hidLng  = document.getElementById('hidLng');
     const hidName = document.getElementById('hidName');
     const banner  = document.getElementById('locBanner');
+    const locMsg  = document.getElementById('locMsg');
+    const locRetry= document.getElementById('locRetry');
 
-    let locOk = false, svcOk = false;
-    function checkReady() { btn.disabled = !(locOk && svcOk); }
+    let locOk = false, svcOk = false, locAsked = false;
+    function checkReady() { btn.disabled = !svcOk; }
 
-    // Geolocation
-    if (!navigator.geolocation) {
-      banner.textContent = '⚠️ Tu navegador no soporta geolocalización.';
-      banner.className = 'rounded-xl px-4 py-3 text-sm mb-5 border bg-red-50 border-red-200 text-red-600';
-    } else {
+    function setBanner(msg, kind, showRetry = false) {
+      locMsg.textContent = msg;
+      const colors = {
+        warn:  'bg-yellow-50 border-yellow-200 text-yellow-800',
+        ok:    'bg-green-50 border-green-200 text-green-700',
+        err:   'bg-red-50 border-red-200 text-red-600',
+        info:  'bg-blue-50 border-blue-200 text-blue-700',
+      };
+      banner.className = 'rounded-xl px-4 py-3 text-sm mb-5 border flex items-center gap-2 ' + (colors[kind] || colors.warn);
+      locRetry.classList.toggle('hidden', !showRetry);
+    }
+
+    function requestLocation() {
+      if (!('geolocation' in navigator)) {
+        setBanner('⚠️ Tu navegador no soporta geolocalización. Puedes continuar sin ella.', 'err', false);
+        return;
+      }
+      locAsked = true;
+      setBanner('⏳ Solicitando acceso a la ubicación…', 'warn', false);
+
+      // Safety net: si en 8s no responde nada, mostramos retry sin bloquear
+      const safety = setTimeout(() => {
+        if (!locOk) {
+          setBanner('⚠️ No pudimos obtener tu ubicación. Toca "Reintentar" o continúa sin ella.', 'err', true);
+        }
+      }, 8000);
+
       navigator.geolocation.getCurrentPosition(
         pos => {
+          clearTimeout(safety);
           hidLat.value = pos.coords.latitude;
           hidLng.value = pos.coords.longitude;
           locOk = true;
-          banner.textContent = '📍 Ubicación detectada — listo para buscar.';
-          banner.className = 'rounded-xl px-4 py-3 text-sm mb-5 border bg-green-50 border-green-200 text-green-700';
+          setBanner('📍 Ubicación detectada — listo para buscar.', 'ok', false);
           checkReady();
         },
-        () => {
-          banner.textContent = '📍 Acceso a la ubicación denegado. Por favor habilítalo en la configuración de tu navegador.';
-          banner.className = 'rounded-xl px-4 py-3 text-sm mb-5 border bg-red-50 border-red-200 text-red-600';
+        err => {
+          clearTimeout(safety);
+          const msgs = {
+            1: '📍 Permiso denegado. Puedes continuar sin ubicación o reintentar.',
+            2: '📍 Posición no disponible. Continúa sin ubicación o reintenta.',
+            3: '📍 Tardó demasiado. Reintenta o continúa sin ubicación.',
+          };
+          setBanner(msgs[err.code] || '📍 No se pudo obtener la ubicación.', 'err', true);
         },
-        { timeout: 10000 }
+        { timeout: 15000, enableHighAccuracy: false, maximumAge: 60000 }
       );
     }
+
+    requestLocation();
 
     // Service selection styling
     document.querySelectorAll('.svc-card input[type="radio"]').forEach(radio => {
