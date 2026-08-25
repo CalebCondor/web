@@ -316,6 +316,7 @@ $todayD  = (int)date('j');
         const card = r.closest('.place-opt');
         if (card.dataset.key === 'home') {
           document.getElementById('homeModal').classList.remove('hidden');
+          if (window.lucide) lucide.createIcons();
         }
         document.querySelectorAll('.place-opt').forEach(c => {
           c.classList.remove('border-blue-600','bg-blue-50');
@@ -370,15 +371,18 @@ $todayD  = (int)date('j');
        onclick="if(event.target===this) cancelHome()">
     <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
       <div class="flex flex-col items-center text-center mb-5">
-        <span class="text-5xl mb-3">🏠</span>
-        <h3 class="text-lg font-extrabold text-slate-900 mb-2">Home Visit Selected</h3>
+        <i data-lucide="home" class="w-12 h-12 text-blue-700 mb-3"></i>
+        <h3 class="text-lg font-extrabold text-blue-500 mb-2">Home Visit Selected</h3>
         <p class="text-sm text-slate-600 leading-relaxed">
           A home visit fee of <strong class="text-blue-700">$80.00 USD</strong> will be added
           to the notary's consultation rate at checkout.
         </p>
       </div>
-      <div class="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-5 flex justify-between text-sm">
-        <span class="text-slate-600">Home visit surcharge</span>
+      <div class="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-5 flex justify-between items-center text-sm">
+        <span class="text-slate-600 flex items-center gap-2">
+          <i data-lucide="circle-dollar-sign" class="w-4 h-4 text-slate-500"></i>
+          Home visit surcharge
+        </span>
         <span class="font-extrabold text-blue-700">+ $80.00 USD</span>
       </div>
       <div class="flex gap-3">
