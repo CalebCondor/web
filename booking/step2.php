@@ -61,11 +61,15 @@ $todayD  = (int)date('j');
       <p class="text-xl font-extrabold text-slate-900 mb-3">When would you like to<br>complete your service?</p>
 
       <div class="flex flex-col gap-2">
-        <?php foreach ([
-          ['today',    '⚡', 'Today',               'Urgent appointment'],
-          ['tomorrow', '📅', 'Tomorrow',             'Next available day'],
-          ['custom',   '🗓️', 'Choose another date',  'Pick a specific date'],
-        ] as [$key, $icon, $label, $sub]): ?>
+        <?php
+          $today    = date('D, M j');
+          $tomorrow = date('D, M j', strtotime('+1 day'));
+          foreach ([
+            ['today',    '⚡', 'Today',               $today],
+            ['tomorrow', '📅', 'Tomorrow',             $tomorrow],
+            ['custom',   '🗓️', 'Choose another date',  'Pick a specific date'],
+          ] as [$key, $icon, $label, $sub]):
+        ?>
           <label class="date-opt flex items-center gap-3 bg-white rounded-2xl p-4 border-[1.5px] border-slate-200 cursor-pointer transition" data-key="<?= $key ?>">
             <input type="radio" name="_dateOpt" value="<?= $key ?>" class="sr-only" <?= $key === 'today' ? 'checked' : '' ?> />
             <div class="opt-icon w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl shrink-0 transition"><?= $icon ?></div>
