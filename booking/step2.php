@@ -338,12 +338,11 @@ $todayD  = (int)date('j');
       hidDate.value = selectedDate;
       if (selectedDate && hidTime.value) {
         const h = document.getElementById('hourSel').value;
-        summary.textContent = `📅 ${selectedDate}  🕐 ${h}:00 ${selectedAmpm}`;
+        summary.innerHTML = `<i data-lucide="calendar" class="inline w-4 h-4 -mt-0.5"></i> ${selectedDate}  <i data-lucide="clock" class="inline w-4 h-4 -mt-0.5"></i> ${String(h).padStart(2,'0')}:00 ${selectedAmpm}`;
+        if (window.lucide) lucide.createIcons();
         summary.classList.remove('hidden');
-        btn.disabled = false;
       } else {
         summary.classList.add('hidden');
-        btn.disabled = true;
       }
     }
 
@@ -353,7 +352,6 @@ $todayD  = (int)date('j');
     document.querySelector('form').addEventListener('submit', () => {
       if (!hidDate.value) hidDate.value = selectedDate || todayISO;
       if (!hidTime.value) buildTime();
-      btn.disabled = false;
     });
   </script>
 
