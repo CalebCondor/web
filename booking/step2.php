@@ -137,7 +137,7 @@ $todayD  = (int)date('j');
     </div>
 
     <!-- Summary chip -->
-    <div id="summaryChip" class="hidden bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-800 font-semibold flex items-center justify-between"></div>
+    <div id="summaryChip" class="hidden bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-800 font-semibold flex items-center justify-around"></div>
 
     <button type="submit" id="continueBtn"
       class="w-full mt-auto bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold
