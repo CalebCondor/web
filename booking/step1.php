@@ -80,26 +80,32 @@ function svcIcon(string $n): string {
       <?php if (empty($services)): ?>
         <p class="text-center text-slate-400 py-10 text-sm">No hay servicios disponibles en este momento.</p>
       <?php else: ?>
-        <?php foreach ($services as $svc):
-          $id   = $svc['id_servicio'] ?? 0;
-          $name = htmlspecialchars($svc['nombre']      ?? '');
-          $desc = htmlspecialchars($svc['descripcion'] ?? '');
-          $icon = svcIcon($svc['nombre'] ?? '');
+        <?php foreach ($services as $i => $svc):
+          $id    = $svc['id_servicio'] ?? 0;
+          $name  = htmlspecialchars($svc['nombre']      ?? '');
+          $desc  = htmlspecialchars($svc['descripcion'] ?? '');
+          $icon  = svcIcon($svc['nombre'] ?? '');
+          $first = $i === 0;
+          $cardCls = $first
+            ? 'svc-card relative flex items-center gap-4 bg-gradient-to-r from-blue-50 to-white rounded-2xl p-4 border-[1.5px] border-blue-300 cursor-pointer transition select-none'
+            : 'svc-card flex items-center gap-4 bg-white rounded-2xl p-4 border-[1.5px] border-slate-200 cursor-pointer transition select-none';
         ?>
-          <label class="svc-card flex items-center gap-4 bg-white rounded-2xl p-4 border-[1.5px] border-slate-200
-                         cursor-pointer transition select-none">
+          <label class="<?= $cardCls ?>" data-first="<?= $first ? '1' : '0' ?>">
+            <?php if ($first): ?>
+              <span class="absolute -top-2 left-4 bg-blue-700 text-white text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-full shadow-md">Más popular</span>
+            <?php endif; ?>
             <input type="radio" name="service_id" value="<?= $id ?>" class="sr-only"
                    data-name="<?= $name ?>" required />
-            <div class="icon-wrap w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 transition">
+            <div class="icon-wrap w-12 h-12 rounded-xl <?= $first ? 'bg-blue-100' : 'bg-slate-100' ?> flex items-center justify-center text-2xl shrink-0 transition">
               <?= $icon ?>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="card-title font-bold text-slate-900 text-sm transition"><?= $name ?></p>
+              <p class="card-title font-bold <?= $first ? 'text-blue-900' : 'text-slate-900' ?> text-sm transition"><?= $name ?></p>
               <?php if ($desc): ?>
                 <p class="text-xs text-slate-400 mt-0.5 line-clamp-2"><?= $desc ?></p>
               <?php endif; ?>
             </div>
-            <div class="radio-outer w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0 transition">
+            <div class="radio-outer w-5 h-5 rounded-full border-2 <?= $first ? 'border-blue-400' : 'border-slate-300' ?> flex items-center justify-center shrink-0 transition">
               <div class="radio-dot w-2.5 h-2.5 rounded-full bg-blue-700 hidden"></div>
             </div>
           </label>
@@ -152,7 +158,9 @@ function svcIcon(string $n): string {
       radio.addEventListener('change', () => {
         document.querySelectorAll('.svc-card').forEach(c => {
           c.classList.remove('border-blue-600', 'bg-blue-50');
-          c.querySelector('.icon-wrap').classList.remove('bg-blue-100');
+          if (c.dataset.first !== '1') {
+            c.querySelector('.icon-wrap').classList.remove('bg-blue-100');
+          }
           c.querySelector('.card-title').classList.remove('text-blue-700');
           c.querySelector('.radio-outer').classList.remove('border-blue-700');
           c.querySelector('.radio-dot').classList.add('hidden');
