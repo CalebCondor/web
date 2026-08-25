@@ -10,7 +10,7 @@ RUN apt-get update \
 
 RUN a2enmod rewrite headers
 
-ENV APP_BASE=/ \
+ENV APP_BASE= \
     API_BASE=https://islandmedpr.com/notarize/api/v1
 
 RUN cat > /usr/local/etc/php/conf.d/app.ini <<'EOF'

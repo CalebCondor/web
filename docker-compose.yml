@@ -10,7 +10,7 @@ services:
       - "8080:80"
     environment:
       API_BASE: ${API_BASE:-https://islandmedpr.com/notarize/api/v1}
-      APP_BASE: ${APP_BASE:-/}
+      APP_BASE: ${APP_BASE:-}
     volumes:
       - sessions:/var/lib/php/sessions
     healthcheck:
