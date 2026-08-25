@@ -30,6 +30,10 @@ RUN mkdir -p /var/lib/php/sessions \
 WORKDIR /var/www/html
 
 COPY index.php ./index.php
+COPY auth.php ./auth.php
+COPY logout.php ./logout.php
+COPY profile.php ./profile.php
+COPY requests.php ./requests.php
 COPY assets/ ./assets/
 COPY booking/step1.php booking/step2.php booking/step3.php booking/step4.php booking/step5.php booking/step6.php ./booking/
 COPY booking/_shared/config.php ./config.php
