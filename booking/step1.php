@@ -155,16 +155,8 @@ function svcIcon(string $n): string {
       locAsked = true;
       setBanner('<span class="inline-flex items-center gap-1.5"><i data-lucide="loader" class="w-4 h-4"></i> Solicitando acceso a la ubicación…</span>', 'warn', false);
 
-      // Safety net: si en 8s no responde nada, mostramos retry sin bloquear
-      const safety = setTimeout(() => {
-        if (!locOk) {
-          setBanner('<span class="inline-flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-4 h-4"></i> No pudimos obtener tu ubicación. Toca "Reintentar" o continúa sin ella.</span>', 'err', true);
-        }
-      }, 8000);
-
       navigator.geolocation.getCurrentPosition(
         pos => {
-          clearTimeout(safety);
           hidLat.value = pos.coords.latitude;
           hidLng.value = pos.coords.longitude;
           locOk = true;
@@ -172,7 +164,6 @@ function svcIcon(string $n): string {
           checkReady();
         },
         err => {
-          clearTimeout(safety);
           const msgs = {
             1: '<i data-lucide="map-pin" class="inline w-4 h-4 mr-1"></i>Permiso denegado. Puedes continuar sin ubicación o reintentar.',
             2: '<i data-lucide="map-pin" class="inline w-4 h-4 mr-1"></i>Posición no disponible. Continúa sin ubicación o reintenta.',
