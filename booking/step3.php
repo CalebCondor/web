@@ -74,16 +74,25 @@ function distLabel($km): string {
   </div>
 
   <!-- Radius filter -->
-  <div class="bg-white border-b border-slate-200 py-2.5">
-    <div class="max-w-sm mx-auto px-4 flex items-center gap-2">
-    <span class="text-xs font-bold text-slate-500 mr-1">Radio:</span>
-    <?php foreach ($RADII as $r): ?>
-      <a href="?radius=<?= $r ?>"
-        class="px-3 py-1.5 rounded-full text-xs font-bold transition
-               <?= $r == $radius ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-blue-100' ?>">
-        <?= $r < 1 ? ($r * 1000).' m' : $r.' km' ?>
-      </a>
-    <?php endforeach; ?>
+  <div class="bg-white border-b border-slate-200 py-3">
+    <div class="max-w-sm mx-auto px-4">
+      <div class="flex items-center gap-1.5 text-slate-500 mb-2">
+        <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+        <span class="text-[11px] font-extrabold uppercase tracking-wider">Radio</span>
+      </div>
+      <div class="flex items-center gap-1.5 bg-slate-100 rounded-full p-1">
+        <?php foreach ($RADII as $r):
+          $active = $r == $radius;
+        ?>
+          <a href="?radius=<?= $r ?>"
+            class="flex-1 text-center px-2 py-1.5 rounded-full text-xs font-bold transition
+                   <?= $active
+                     ? 'bg-blue-700 text-white shadow-sm'
+                     : 'text-slate-600 hover:bg-white hover:text-blue-700' ?>">
+            <?= $r < 1 ? ($r * 1000).' m' : $r.' km' ?>
+          </a>
+        <?php endforeach; ?>
+      </div>
     </div>
   </div>
 

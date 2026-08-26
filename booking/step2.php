@@ -71,14 +71,14 @@ $todayD  = (int)date('j');
           $today    = $fmt(date('Y-m-d'));
           $tomorrow = $fmt(date('Y-m-d', strtotime('+1 day')));
           foreach ([
-            ['today',    '⚡', 'Hoy',                  $today],
-            ['tomorrow', '📅', 'Mañana',                $tomorrow],
-            ['custom',   '🗓️', 'Elegir otra fecha',     'Selecciona una fecha específica'],
+            ['today',    'zap',           'Hoy',                  $today],
+            ['tomorrow', 'calendar',      'Mañana',                $tomorrow],
+            ['custom',   'calendar-days', 'Elegir otra fecha',     'Selecciona una fecha específica'],
           ] as [$key, $icon, $label, $sub]):
         ?>
           <label class="date-opt flex items-center gap-3 bg-white rounded-2xl p-4 border-[1.5px] border-slate-200 cursor-pointer transition" data-key="<?= $key ?>">
             <input type="radio" name="_dateOpt" value="<?= $key ?>" class="sr-only" <?= $key === 'today' ? 'checked' : '' ?> />
-            <div class="opt-icon w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl shrink-0 transition"><?= $icon ?></div>
+            <div class="opt-icon w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 shrink-0 transition"><i data-lucide="<?= $icon ?>" class="w-5 h-5"></i></div>
             <div class="flex-1">
               <p class="opt-label font-bold text-slate-900 text-sm"><?= $label ?></p>
               <p class="text-xs text-slate-400"><?= $sub ?></p>
