@@ -28,14 +28,14 @@ $services = isset($raw[0]) ? $raw : ($raw['data'] ?? []);
 
 function svcIcon(string $n): string {
     $l = strtolower($n);
-    if (strpos($l, 'escritura')  !== false) return '📜';
-    if (strpos($l, 'firma')        !== false) return '✍️';
-    if (strpos($l, 'testamento')   !== false) return '📋';
-    if (strpos($l, 'poder')        !== false) return '⚖️';
-    if (strpos($l, 'hipoteca')     !== false) return '🏠';
-    if (strpos($l, 'sociedad')     !== false) return '🏢';
-    if (strpos($l, 'divorcio')     !== false) return '💼';
-    return '🏛️';
+    if (str_contains($l, 'escritura'))  return '<i data-lucide="scroll" class="w-6 h-6"></i>';
+    if (str_contains($l, 'firma'))      return '<i data-lucide="pen-line" class="w-6 h-6"></i>';
+    if (str_contains($l, 'testamento')) return '<i data-lucide="file-text" class="w-6 h-6"></i>';
+    if (str_contains($l, 'poder'))      return '<i data-lucide="scale" class="w-6 h-6"></i>';
+    if (str_contains($l, 'hipoteca'))   return '<i data-lucide="home" class="w-6 h-6"></i>';
+    if (str_contains($l, 'sociedad'))   return '<i data-lucide="building" class="w-6 h-6"></i>';
+    if (str_contains($l, 'divorcio'))   return '<i data-lucide="briefcase" class="w-6 h-6"></i>';
+    return '<i data-lucide="building-2" class="w-6 h-6"></i>';
 }
 ?>
 <!DOCTYPE html>

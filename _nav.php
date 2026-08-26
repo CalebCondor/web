@@ -21,7 +21,7 @@
 
       <a href="<?= APP_BASE ?>/requests.php"
          class="flex-1 flex flex-col items-center py-4 gap-1.5 hover:bg-white/10 active:bg-white/20 transition">
-        <svg class="w-6 h-6 text-white/70" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 text-white/70" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
         </svg>
         <span class="text-white/70 text-[9px] font-semibold whitespace-nowrap">Requests</span>

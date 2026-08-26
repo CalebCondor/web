@@ -1,4 +1,4 @@
-<?php $loggedIn = !empty($_SESSION['client_token']); ?>
+<?php if (!empty($_SESSION['client_token'])): ?>
 <div class="px-3 pb-4 pt-2">
   <nav class="bg-[#253b8e] rounded-[22px] shadow-2xl overflow-hidden">
     <div class="flex divide-x divide-white/20">
@@ -46,3 +46,4 @@
     </div>
   </nav>
 </div>
+<?php endif; ?>
