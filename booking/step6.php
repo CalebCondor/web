@@ -107,7 +107,7 @@ $mapsUrl  = "https://www.google.com/maps/dir/?api=1&origin={$userLat},{$userLng}
         class="flex-1 inline-flex items-center justify-center gap-1.5 border-[1.5px] border-blue-700 text-blue-700 font-bold rounded-2xl py-3.5 text-sm hover:bg-blue-50 active:scale-95 transition">
         <i data-lucide="map" class="w-4 h-4"></i> Abrir en Mapas
       </a>
-      <a href="../step1.php"
+      <a href="/step1.php"
         class="flex-1 text-center bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-bold rounded-2xl py-3.5 text-sm shadow-lg shadow-blue-700/30 transition">
         Subir Documento →
       </a>

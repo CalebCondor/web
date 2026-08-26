@@ -35,6 +35,7 @@ COPY logout.php ./logout.php
 COPY profile.php ./profile.php
 COPY requests.php ./requests.php
 COPY assets/ ./assets/
+COPY step1.php ./step1.php
 COPY booking/step1.php booking/step2.php booking/step3.php booking/step4.php booking/step5.php booking/step6.php ./booking/
 COPY booking/_shared/config.php ./config.php
 COPY booking/_shared/_head.php ./_head.php
@@ -46,7 +47,7 @@ RUN cat > /etc/apache2/sites-available/000-default.conf <<'EOF'
     DocumentRoot /var/www/html
 
     RewriteEngine On
-    RewriteRule ^/step([0-9]+)\.php$ /booking/step$1.php [L]
+    RewriteRule ^/step([2-9])\.php$ /booking/step$1.php [L]
 
     <Directory /var/www/html>
         Options -Indexes +FollowSymLinks
