@@ -28,7 +28,7 @@
       <?php $navItem(APP_BASE . '/profile.php',  'user-round',   'Perfil',          'profile.php'); ?>
 
       <a href="<?= APP_BASE ?>/logout.php"
-         class="flex-1 flex flex-col items-center justify-center gap-1 py-3 transition text-red-200 hover:text-white hover:bg-red-500/20">
+         class="flex-1 flex flex-col items-center justify-center gap-1 py-3 transition text-white/60 hover:text-white hover:bg-white/5">
         <i data-lucide="log-out" class="w-6 h-6"></i>
         <span class="text-[10px] font-bold whitespace-nowrap tracking-wide">Salir</span>
       </a>
