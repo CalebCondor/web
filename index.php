@@ -46,6 +46,9 @@
       background: rgba(15, 23, 42, 0.55);
       z-index: 1;
     }
+    .logo-white {
+      filter: brightness(0) invert(1);
+    }
   </style>
 </head>
 
@@ -54,6 +57,9 @@
   <div class="bg-overlay"></div>
 
 <div class="w-full md:max-w-sm min-h-screen flex flex-col md:shadow-2xl relative z-10">
+
+  <!-- Logo -->
+  <img src="assets/LogoS2.png" alt="Notarize" class="logo-white absolute top-6 left-6 h-10 w-auto z-20" />
 
   <!-- Mobile-width card -->
   <div class="flex-1 flex flex-col items-center justify-end px-8 pt-16 pb-20 gap-8">
