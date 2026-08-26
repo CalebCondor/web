@@ -34,8 +34,7 @@ $todayD  = (int)date('j');
 <div class="w-full md:max-w-sm min-h-screen bg-slate-50 flex flex-col md:shadow-2xl relative">
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
-    <div class="w-6"></div>
-    <span class="text-white font-extrabold text-base">Fecha y Hora</span>
+    <img src="../assets/LogoS2.png" alt="Notarize" class="h-11 w-auto brightness-0 invert">
   </div>
 
 
@@ -59,6 +58,7 @@ $todayD  = (int)date('j');
 
     <!-- Date selection -->
     <div>
+      <h1 class="text-sm font-bold text-blue-900 uppercase tracking-wide mb-2">Fecha y Hora</h1>
       <p class="text-xl font-extrabold text-slate-900 mb-3">¿Cuándo te gustaría<br>realizar tu servicio?</p>
 
       <div class="flex flex-col gap-2">

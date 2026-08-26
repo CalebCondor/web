@@ -38,8 +38,8 @@ $modLabel    = $domicilio ? 'Visita a domicilio' : 'En la notaría';
 <div class="w-full md:max-w-sm min-h-screen bg-slate-50 flex flex-col md:shadow-2xl relative">
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
-    <span class="text-white font-extrabold text-base flex-1 text-center">Pago Confirmado</span>
-    <span class="text-white/50 text-xs">5/6</span>
+    <img src="../assets/LogoS2.png" alt="Notarize" class="h-11 w-auto brightness-0 invert">
+    <span class="text-white/50 text-xs ml-auto">5/6</span>
   </div>
 
   <div class="flex-1 px-4 py-4 flex flex-col gap-3 overflow-y-auto">
@@ -68,6 +68,7 @@ $modLabel    = $domicilio ? 'Visita a domicilio' : 'En la notaría';
         </svg>
       </div>
       <div>
+        <p class="text-xs font-bold text-blue-900 uppercase tracking-wide mb-1">Pago Confirmado</p>
         <h1 class="text-lg font-extrabold text-slate-900">¡Pago confirmado!</h1>
         <p class="text-xs text-slate-500 mt-0.5">Tu servicio ha sido reservado con éxito.</p>
       </div>

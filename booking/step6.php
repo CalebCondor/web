@@ -35,9 +35,9 @@ $mapsUrl  = "https://www.google.com/maps/dir/?api=1&origin={$userLat},{$userLng}
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
     <a href="step5.php" class="text-blue-300 text-xl leading-none">‹</a>
-    <span class="text-white font-extrabold text-base flex-1">Ruta al Notario</span>
+    <img src="../assets/LogoS2.png" alt="Notarize" class="h-11 w-auto brightness-0 invert">
     <a href="<?= htmlspecialchars($mapsUrl) ?>" target="_blank"
-       class="bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-full hover:bg-white/30 transition whitespace-nowrap">
+       class="bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-full hover:bg-white/30 transition whitespace-nowrap ml-auto">
       Abrir Mapas
     </a>
   </div>
@@ -49,6 +49,8 @@ $mapsUrl  = "https://www.google.com/maps/dir/?api=1&origin={$userLat},{$userLng}
   <div id="routeBar" class="hidden bg-blue-700 px-4 py-2 text-white text-xs font-semibold text-center"></div>
 
   <div class="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-4">
+
+    <p class="text-sm font-bold text-blue-900 uppercase tracking-wide">Ruta al Notario</p>
 
     <!-- Confirmed badge -->
     <div class="flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-4 py-3.5">

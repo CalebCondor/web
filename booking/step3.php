@@ -50,8 +50,7 @@ function distLabel($km): string {
 <div class="w-full md:max-w-sm min-h-screen bg-slate-50 flex flex-col md:shadow-2xl relative overflow-hidden">
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
-    <div class="w-6"></div>
-    <span class="text-white font-extrabold text-base">Notarios Disponibles</span>
+    <img src="../assets/LogoS2.png" alt="Notarize" class="h-11 w-auto brightness-0 invert">
   </div>
 
 
@@ -100,7 +99,8 @@ function distLabel($km): string {
   </div>
 
   <div class="flex-1 w-full max-w-sm mx-auto px-4 py-5">
-    <h2 class="text-lg font-extrabold text-slate-900 mb-1">Notarios Disponibles</h2>
+    <h1 class="text-sm font-bold text-blue-900 uppercase tracking-wide mb-2">Notarios Disponibles</h1>
+    <h2 class="text-lg font-extrabold text-slate-900 mb-1">Elige tu notario</h2>
     <p class="text-sm text-slate-500 mb-4">Selecciona la opción más conveniente para ti.</p>
 
     <?php if ($apiErr): ?>

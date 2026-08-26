@@ -48,14 +48,14 @@ function svcIcon(string $n): string {
 <div class="w-full md:max-w-sm min-h-screen bg-slate-50 flex flex-col md:shadow-2xl relative">
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
-    <div class="w-6"></div>
-    <span class="text-white font-extrabold text-base">Seleccionar Servicio</span>
+    <img src="../assets/LogoS2.png" alt="Notarize" class="h-11 w-auto brightness-0 invert">
   </div>
 
 
 
   <div class="flex-1 w-full px-6 py-8">
 
+    <h1 class="text-sm font-bold text-blue-900 uppercase tracking-wide mb-2">Seleccionar Servicio</h1>
     <h2 class="text-2xl font-extrabold text-slate-900 leading-tight mb-1">
       ¿Qué tipo de servicio<br>notarial necesitas?
     </h2>

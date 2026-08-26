@@ -108,9 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="w-full md:max-w-sm min-h-screen bg-slate-50 flex flex-col md:shadow-2xl relative">
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
-    <div class="w-6"></div>
-    <span class="text-white font-extrabold text-base flex-1">Pago</span>
-    <span class="text-white/50 text-xs">4/5</span>
+    <img src="../assets/LogoS2.png" alt="Notarize" class="h-11 w-auto brightness-0 invert">
+    <span class="text-white/50 text-xs ml-auto">4/5</span>
   </div>
 
   <div class="flex-1 px-5 py-6 flex flex-col gap-4 overflow-y-auto pb-28">
@@ -121,6 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div>
+      <p class="text-sm font-bold text-blue-900 uppercase tracking-wide mb-2">Pago</p>
       <h1 class="text-2xl font-extrabold text-slate-900 mb-1">Resumen del Pago</h1>
       <p class="text-sm text-slate-500">Revisa los detalles antes de continuar</p>
     </div>
