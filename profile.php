@@ -73,8 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <?php if ($saved): ?>
-      <div class="mx-5 mb-4 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
-        ✓ Profile updated successfully.
+      <div class="mx-5 mb-4 bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3 inline-flex items-center gap-1.5">
+        <i data-lucide="check" class="w-4 h-4"></i> Profile updated successfully.
       </div>
     <?php endif; ?>
 

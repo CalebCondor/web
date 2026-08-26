@@ -61,13 +61,13 @@ $statusMap = [
 
     <?php if ($error): ?>
       <div class="flex flex-col items-center py-16 gap-3">
-        <span class="text-4xl">⚠️</span>
+        <i data-lucide="alert-triangle" class="w-12 h-12 text-red-400"></i>
         <p class="text-red-500 text-sm text-center"><?= htmlspecialchars($error) ?></p>
       </div>
 
     <?php elseif (empty($pagos)): ?>
       <div class="flex flex-col items-center py-16 gap-2">
-        <span class="text-5xl">📋</span>
+        <i data-lucide="clipboard-list" class="w-14 h-14 text-slate-300"></i>
         <p class="font-bold text-slate-600 mt-2">No requests yet.</p>
         <p class="text-sm text-slate-400">Your bookings will appear here.</p>
       </div>
@@ -117,10 +117,14 @@ $statusMap = [
               <?php foreach ($pagoFiles as $arch):
                 $fname = $arch['nombre_archivo'] ?? 'Document';
                 $ext   = strtolower(pathinfo($fname, PATHINFO_EXTENSION));
-                $icon  = $ext === 'pdf' ? '📕' : (in_array($ext, ['doc','docx']) ? '📘' : (in_array($ext, ['jpg','jpeg','png']) ? '🖼️' : '📄'));
+                if     ($ext === 'pdf')                              $icon = 'file-text';
+                elseif (in_array($ext, ['doc','docx']))               $icon = 'file-text';
+                elseif (in_array($ext, ['jpg','jpeg','png']))         $icon = 'image';
+                else                                                  $icon = 'file';
+                $color = $ext === 'pdf' ? 'text-red-500' : ($icon === 'image' ? 'text-purple-500' : 'text-slate-500');
               ?>
                 <div class="flex items-center gap-2 py-1.5">
-                  <span class="text-base"><?= $icon ?></span>
+                  <i data-lucide="<?= $icon ?>" class="w-4 h-4 <?= $color ?>"></i>
                   <span class="text-xs text-slate-700 font-semibold truncate flex-1"><?= htmlspecialchars($fname) ?></span>
                 </div>
               <?php endforeach; ?>

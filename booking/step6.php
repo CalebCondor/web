@@ -15,7 +15,7 @@ $service  = htmlspecialchars($b['service_name'] ?? '');
 $date     = htmlspecialchars($b['date']         ?? '');
 $time     = htmlspecialchars($b['time']         ?? '');
 $domicilio = (int)($b['domicilio'] ?? 0);
-$modLabel = $domicilio ? '🏠 Visita a domicilio' : '🏛️ En la notaría';
+$modLabel = $domicilio ? 'Visita a domicilio' : 'En la notaría';
 $invoice  = $b['pago']['numero_factura'] ?? $b['pago']['invoice'] ?? null;
 $mapsUrl  = "https://www.google.com/maps/dir/?api=1&origin={$userLat},{$userLng}&destination={$ntLat},{$ntLng}&travelmode=driving";
 ?><!DOCTYPE html>
@@ -72,7 +72,7 @@ $mapsUrl  = "https://www.google.com/maps/dir/?api=1&origin={$userLat},{$userLng}
         <div class="flex-1 min-w-0">
           <p class="font-extrabold text-slate-900 text-sm truncate"><?= htmlspecialchars($ntName) ?></p>
           <?php if ($address): ?>
-            <p class="text-xs text-slate-400 truncate mt-0.5">📍 <?= htmlspecialchars($address) ?></p>
+            <p class="text-xs text-slate-400 truncate mt-0.5 inline-flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 shrink-0"></i> <?= htmlspecialchars($address) ?></p>
           <?php endif; ?>
         </div>
       </div>
@@ -87,7 +87,10 @@ $mapsUrl  = "https://www.google.com/maps/dir/?api=1&origin={$userLat},{$userLng}
         </div>
         <div>
           <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Ubicación</p>
-          <p class="font-bold text-slate-900 text-xs mt-0.5"><?= $domicilio ? '🏠' : '🏛️' ?> <?= htmlspecialchars($modLabel) ?></p>
+          <p class="font-bold text-slate-900 text-xs mt-0.5 inline-flex items-center gap-1.5">
+            <i data-lucide="<?= $domicilio ? 'home' : 'building-2' ?>" class="w-3.5 h-3.5"></i>
+            <?= htmlspecialchars($domicilio ? 'Visita a domicilio' : 'En la notaría') ?>
+          </p>
         </div>
         <?php if ($invoice): ?>
         <div>
@@ -101,8 +104,8 @@ $mapsUrl  = "https://www.google.com/maps/dir/?api=1&origin={$userLat},{$userLng}
     <!-- Action buttons -->
     <div class="flex gap-3 pb-2">
       <a href="<?= htmlspecialchars($mapsUrl) ?>" target="_blank"
-        class="flex-1 text-center border-[1.5px] border-blue-700 text-blue-700 font-bold rounded-2xl py-3.5 text-sm hover:bg-blue-50 active:scale-95 transition">
-        🗺️ Abrir en Mapas
+        class="flex-1 inline-flex items-center justify-center gap-1.5 border-[1.5px] border-blue-700 text-blue-700 font-bold rounded-2xl py-3.5 text-sm hover:bg-blue-50 active:scale-95 transition">
+        <i data-lucide="map" class="w-4 h-4"></i> Abrir en Mapas
       </a>
       <a href="../step1.php"
         class="flex-1 text-center bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-bold rounded-2xl py-3.5 text-sm shadow-lg shadow-blue-700/30 transition">
@@ -147,7 +150,8 @@ if (ntLat && ntLng) {
         const km   = (route.distance / 1000).toFixed(1);
         const mins = Math.round(route.duration / 60);
         const bar  = document.getElementById('routeBar');
-        bar.textContent = `🚗  ${km} km  ·  ~${mins} min en auto`;
+        bar.innerHTML = `<span class="inline-flex items-center justify-center gap-1.5"><i data-lucide="car" class="w-3.5 h-3.5"></i> ${km} km  ·  ~${mins} min en auto</span>`;
+        if (window.lucide) lucide.createIcons();
         bar.classList.remove('hidden');
       } else { fallback(); }
     })

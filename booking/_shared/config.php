@@ -47,7 +47,11 @@ function booking_progress(int $current): void {
         $dot  = $done ? 'bg-green-400' : ($cur ? 'bg-white' : 'bg-white/30');
         $txt  = $done ? 'text-green-400' : ($cur ? 'text-white font-bold' : 'text-white/40');
         echo "<div class='flex flex-col items-center gap-1 flex-1'>";
-        echo "<div class='w-5 h-5 rounded-full $dot flex items-center justify-center text-[9px] font-bold text-[#1e3a8a]'>" . ($done ? '✓' : $n) . "</div>";
+        if ($done) {
+            echo "<div class='w-5 h-5 rounded-full $dot flex items-center justify-center text-[#1e3a8a]'><i data-lucide='check' class='w-3 h-3'></i></div>";
+        } else {
+            echo "<div class='w-5 h-5 rounded-full $dot flex items-center justify-center text-[9px] font-bold text-[#1e3a8a]'>$n</div>";
+        }
         echo "<span class='text-[9px] $txt text-center leading-tight'>$label</span>";
         echo "</div>";
         if ($n < count($steps)) echo "<div class='h-px flex-1 mb-3 " . ($done ? 'bg-green-400' : 'bg-white/20') . "'></div>";
@@ -66,7 +70,11 @@ function step_progress(int $current): void {
         $dot  = $done ? 'bg-green-400' : ($cur ? 'bg-white' : 'bg-white/30');
         $txt  = $done ? 'text-green-400' : ($cur ? 'text-white font-bold' : 'text-white/40');
         echo "<div class='flex flex-col items-center gap-1 flex-1'>";
-        echo "<div class='w-5 h-5 rounded-full $dot flex items-center justify-center text-[9px] font-bold text-[#1e3a8a]'>" . ($done ? '✓' : $n) . "</div>";
+        if ($done) {
+            echo "<div class='w-5 h-5 rounded-full $dot flex items-center justify-center text-[#1e3a8a]'><i data-lucide='check' class='w-3 h-3'></i></div>";
+        } else {
+            echo "<div class='w-5 h-5 rounded-full $dot flex items-center justify-center text-[9px] font-bold text-[#1e3a8a]'>$n</div>";
+        }
         echo "<span class='text-[9px] $txt text-center leading-tight'>$label</span>";
         echo "</div>";
         if ($n < count($steps)) echo "<div class='h-px flex-1 mb-3 " . ($done ? 'bg-green-400' : 'bg-white/20') . "'></div>";

@@ -59,15 +59,18 @@ function distLabel($km): string {
   <!-- Context strip -->
   <div class="bg-white border-b border-slate-200 py-2.5">
     <div class="max-w-sm mx-auto px-4 flex flex-wrap gap-2">
-    <?php foreach ([
-      '🏛️ ' . ($b['service_name'] ?? ''),
-      '📅 ' . ($b['date']         ?? ''),
-      '🕐 ' . ($b['time']         ?? ''),
-      $domicilio ? '🏠 A tu domicilio' : '🏛️ En la notaría',
-    ] as $chip): ?>
-      <span class="<?= $domicilio && strpos($chip,'🏠') !== false ? 'bg-green-100 text-green-800 border-green-200' : 'bg-slate-100 text-slate-600 border-slate-200' ?>
-                   border text-xs font-semibold rounded-full px-3 py-1">
-        <?= htmlspecialchars($chip) ?>
+    <?php
+      $chips = [
+        ['building-2', $b['service_name'] ?? '', false],
+        ['calendar',   $b['date']         ?? '', false],
+        ['clock',      $b['time']         ?? '', false],
+        [$domicilio ? 'home' : 'building-2', $domicilio ? 'A tu domicilio' : 'En la notaría', $domicilio],
+      ];
+      foreach ($chips as [$icon, $label, $hl]):
+    ?>
+      <span class="inline-flex items-center gap-1 <?= $hl ? 'bg-green-100 text-green-800 border-green-200' : 'bg-slate-100 text-slate-600 border-slate-200' ?> border text-xs font-semibold rounded-full px-3 py-1">
+        <i data-lucide="<?= $icon ?>" class="w-3.5 h-3.5"></i>
+        <?= htmlspecialchars($label) ?>
       </span>
     <?php endforeach; ?>
     </div>
@@ -102,13 +105,13 @@ function distLabel($km): string {
 
     <?php if ($apiErr): ?>
       <div class="flex flex-col items-center py-16 gap-3">
-        <span class="text-4xl">⚠️</span>
+        <i data-lucide="alert-triangle" class="w-12 h-12 text-red-400"></i>
         <p class="text-red-500 text-sm text-center"><?= htmlspecialchars($apiErr) ?></p>
       </div>
 
     <?php elseif (empty($notaries)): ?>
       <div class="flex flex-col items-center py-16 gap-3">
-        <span class="text-5xl">🔍</span>
+        <i data-lucide="search-x" class="w-14 h-14 text-slate-300"></i>
         <p class="font-bold text-slate-700">No se encontraron notarios</p>
         <p class="text-sm text-slate-400">Intenta aumentar el radio de búsqueda arriba.</p>
       </div>
@@ -139,13 +142,18 @@ function distLabel($km): string {
               </div>
               <div class="flex flex-wrap gap-1.5">
                 <?php if ($avail): ?>
-                  <span class="bg-green-50 border border-green-200 text-green-700 text-[10px] font-bold rounded-full px-2 py-0.5">
-                    🕐 <?= substr($n['horario_dia']['hora_inicio'] ?? '', 0, 5) ?>–<?= substr($n['horario_dia']['hora_fin'] ?? '', 0, 5) ?>
+                  <span class="inline-flex items-center gap-1 bg-green-50 border border-green-200 text-green-700 text-[10px] font-bold rounded-full px-2 py-0.5">
+                    <i data-lucide="clock" class="w-3 h-3"></i>
+                    <?= substr($n['horario_dia']['hora_inicio'] ?? '', 0, 5) ?>–<?= substr($n['horario_dia']['hora_fin'] ?? '', 0, 5) ?>
                   </span>
                 <?php endif; ?>
-                <span class="bg-green-50 border border-green-200 text-green-700 text-[10px] font-bold rounded-full px-2 py-0.5">✓ Disponible</span>
+                <span class="inline-flex items-center gap-1 bg-green-50 border border-green-200 text-green-700 text-[10px] font-bold rounded-full px-2 py-0.5">
+                  <i data-lucide="check" class="w-3 h-3"></i> Disponible
+                </span>
                 <?php if ($n['tramites_domicilio'] ?? false): ?>
-                  <span class="bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full px-2 py-0.5">🏠 A domicilio</span>
+                  <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full px-2 py-0.5">
+                    <i data-lucide="home" class="w-3 h-3"></i> A domicilio
+                  </span>
                 <?php endif; ?>
               </div>
             </div>
@@ -172,8 +180,8 @@ function distLabel($km): string {
           <span class="text-slate-500">Tarifa del notario</span>
           <span id="mBase" class="font-semibold text-slate-900">—</span>
         </div>
-        <div id="mHomeFee" class="hidden flex justify-between">
-          <span class="text-slate-500">🏠 Cargo por visita a domicilio</span>
+        <div id="mHomeFee" class="hidden flex justify-between items-center">
+          <span class="text-slate-500 inline-flex items-center gap-1.5"><i data-lucide="home" class="w-3.5 h-3.5"></i> Cargo por visita a domicilio</span>
           <span id="mHomeFeeVal" class="font-semibold text-orange-600">—</span>
         </div>
         <div class="flex justify-between pt-2.5 border-t border-slate-200">

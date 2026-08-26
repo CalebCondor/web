@@ -115,8 +115,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <div class="flex-1 px-5 py-6 flex flex-col gap-4 overflow-y-auto pb-28">
 
-    <div class="inline-flex self-start bg-blue-100 text-blue-800 text-xs font-semibold rounded-full px-3 py-1.5">
-      🏛️ <?= htmlspecialchars($service) ?>
+    <div class="inline-flex self-start items-center gap-1.5 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full px-3 py-1.5">
+      <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
+      <?= htmlspecialchars($service) ?>
     </div>
 
     <div>
@@ -159,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <?php if ($homeFee): ?>
           <div class="flex justify-between items-center py-2.5 border-b border-slate-100">
-            <span class="text-sm text-slate-400">🏠 Cargo por visita a domicilio</span>
+            <span class="text-sm text-slate-400 inline-flex items-center gap-1.5"><i data-lucide="home" class="w-3.5 h-3.5"></i> Cargo por visita a domicilio</span>
             <span class="text-sm font-semibold text-slate-900"><?= $currency ?> <?= number_format($homeFee, 2) ?></span>
           </div>
         <?php endif; ?>

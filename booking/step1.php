@@ -63,7 +63,7 @@ function svcIcon(string $n): string {
 
     <!-- Location status banner -->
     <div id="locBanner" class="rounded-xl px-4 py-3 text-sm mb-5 border bg-yellow-50 border-yellow-200 text-yellow-800 flex items-center gap-2">
-      <span id="locMsg" class="flex-1">⏳ Solicitando acceso a la ubicación…</span>
+      <span id="locMsg" class="flex-1 inline-flex items-center gap-1.5"><i data-lucide="loader" class="w-4 h-4"></i> Solicitando acceso a la ubicación…</span>
       <button type="button" id="locRetry" class="hidden font-bold underline whitespace-nowrap" onclick="requestLocation()">Reintentar</button>
     </div>
 
@@ -135,7 +135,8 @@ function svcIcon(string $n): string {
     function checkReady() { btn.disabled = !svcOk; }
 
     function setBanner(msg, kind, showRetry = false) {
-      locMsg.textContent = msg;
+      locMsg.innerHTML = msg;
+      if (window.lucide) lucide.createIcons({ nameAttr: 'data-lucide' });
       const colors = {
         warn:  'bg-yellow-50 border-yellow-200 text-yellow-800',
         ok:    'bg-green-50 border-green-200 text-green-700',
@@ -148,16 +149,16 @@ function svcIcon(string $n): string {
 
     function requestLocation() {
       if (!('geolocation' in navigator)) {
-        setBanner('⚠️ Tu navegador no soporta geolocalización. Puedes continuar sin ella.', 'err', false);
+        setBanner('<span class="inline-flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Tu navegador no soporta geolocalización. Puedes continuar sin ella.</span>', 'err', false);
         return;
       }
       locAsked = true;
-      setBanner('⏳ Solicitando acceso a la ubicación…', 'warn', false);
+      setBanner('<span class="inline-flex items-center gap-1.5"><i data-lucide="loader" class="w-4 h-4"></i> Solicitando acceso a la ubicación…</span>', 'warn', false);
 
       // Safety net: si en 8s no responde nada, mostramos retry sin bloquear
       const safety = setTimeout(() => {
         if (!locOk) {
-          setBanner('⚠️ No pudimos obtener tu ubicación. Toca "Reintentar" o continúa sin ella.', 'err', true);
+          setBanner('<span class="inline-flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-4 h-4"></i> No pudimos obtener tu ubicación. Toca "Reintentar" o continúa sin ella.</span>', 'err', true);
         }
       }, 8000);
 
@@ -167,17 +168,17 @@ function svcIcon(string $n): string {
           hidLat.value = pos.coords.latitude;
           hidLng.value = pos.coords.longitude;
           locOk = true;
-          setBanner('📍 Ubicación detectada — listo para buscar.', 'ok', false);
+          setBanner('<span class="inline-flex items-center gap-1.5"><i data-lucide="map-pin" class="w-4 h-4"></i> Ubicación detectada — listo para buscar.</span>', 'ok', false);
           checkReady();
         },
         err => {
           clearTimeout(safety);
           const msgs = {
-            1: '📍 Permiso denegado. Puedes continuar sin ubicación o reintentar.',
-            2: '📍 Posición no disponible. Continúa sin ubicación o reintenta.',
-            3: '📍 Tardó demasiado. Reintenta o continúa sin ubicación.',
+            1: '<i data-lucide="map-pin" class="inline w-4 h-4 mr-1"></i>Permiso denegado. Puedes continuar sin ubicación o reintentar.',
+            2: '<i data-lucide="map-pin" class="inline w-4 h-4 mr-1"></i>Posición no disponible. Continúa sin ubicación o reintenta.',
+            3: '<i data-lucide="map-pin" class="inline w-4 h-4 mr-1"></i>Tardó demasiado. Reintenta o continúa sin ubicación.',
           };
-          setBanner(msgs[err.code] || '📍 No se pudo obtener la ubicación.', 'err', true);
+          setBanner(msgs[err.code] || '<i data-lucide="map-pin" class="inline w-4 h-4 mr-1"></i>No se pudo obtener la ubicación.', 'err', true);
         },
         { timeout: 15000, enableHighAccuracy: false, maximumAge: 60000 }
       );

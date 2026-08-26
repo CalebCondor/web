@@ -46,8 +46,9 @@ $todayD  = (int)date('j');
     <input type="hidden" id="hidDom"  name="domicilio" value="0" />
 
     <!-- Context chip -->
-    <div class="inline-flex self-start bg-blue-100 text-blue-800 text-xs font-semibold rounded-full px-3 py-1.5">
-      🏛️ <?= htmlspecialchars($booking['service_name'] ?? '') ?>
+    <div class="inline-flex self-start items-center gap-1.5 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full px-3 py-1.5">
+      <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
+      <?= htmlspecialchars($booking['service_name'] ?? '') ?>
     </div>
 
     <?php if (!empty($error)): ?>

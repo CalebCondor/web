@@ -49,12 +49,14 @@ $modLabel    = $domicilio ? 'Visita a domicilio' : 'En la notaría';
     $createErr   = $pago['_create_err']   ?? null;
     ?>
     <?php if ($createErr): ?>
-      <div class="bg-red-50 border border-red-200 rounded-xl px-3 py-2 text-xs text-red-700 break-all">
-        ⚠️ Error al crear el pago: <?= htmlspecialchars($createErr) ?>
+      <div class="bg-red-50 border border-red-200 rounded-xl px-3 py-2 text-xs text-red-700 break-all inline-flex items-start gap-1.5">
+        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i>
+        <span>Error al crear el pago: <?= htmlspecialchars($createErr) ?></span>
       </div>
     <?php elseif ($checkoutMsg): ?>
-      <div class="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-xs text-amber-800 break-all">
-        ⚠️ Checkout: <?= htmlspecialchars($checkoutMsg) ?>
+      <div class="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-xs text-amber-800 break-all inline-flex items-start gap-1.5">
+        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i>
+        <span>Checkout: <?= htmlspecialchars($checkoutMsg) ?></span>
       </div>
     <?php endif; ?>
 
@@ -80,7 +82,7 @@ $modLabel    = $domicilio ? 'Visita a domicilio' : 'En la notaría';
           </div>
           <div class="flex-1 min-w-0">
             <p class="font-extrabold text-slate-900 text-sm truncate"><?= htmlspecialchars($notaryName) ?></p>
-            <?php if ($direccion): ?><p class="text-xs text-slate-400 truncate">📍 <?= htmlspecialchars($direccion) ?></p><?php endif; ?>
+            <?php if ($direccion): ?><p class="text-xs text-slate-400 truncate inline-flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 shrink-0"></i> <?= htmlspecialchars($direccion) ?></p><?php endif; ?>
           </div>
         </div>
       </div>
@@ -125,7 +127,7 @@ $modLabel    = $domicilio ? 'Visita a domicilio' : 'En la notaría';
         </div>
         <div class="flex justify-between items-center py-2.5 border-b border-slate-100">
           <span class="text-sm text-slate-400">Estado</span>
-          <span class="text-sm font-extrabold text-green-600">✓ Aprobado</span>
+          <span class="text-sm font-extrabold text-green-600 inline-flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Aprobado</span>
         </div>
 
         <!-- Price breakdown -->
@@ -135,7 +137,7 @@ $modLabel    = $domicilio ? 'Visita a domicilio' : 'En la notaría';
         </div>
         <?php if ($homeFee): ?>
           <div class="flex justify-between items-center py-2.5 border-b border-slate-100">
-            <span class="text-sm text-slate-400">🏠 Cargo por visita a domicilio</span>
+            <span class="text-sm text-slate-400 inline-flex items-center gap-1.5"><i data-lucide="home" class="w-3.5 h-3.5"></i> Cargo por visita a domicilio</span>
             <span class="text-sm font-semibold text-orange-600">+ <?= $currency ?> <?= number_format($homeFee, 2) ?></span>
           </div>
         <?php endif; ?>
