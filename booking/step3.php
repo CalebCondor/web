@@ -17,7 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$radius     = (float)($_GET['radius'] ?? $b['radius'] ?? 5);
+$rawRadius  = $_GET['radius'] ?? $b['radius'] ?? null;
+$radius     = ($rawRadius !== null && $rawRadius !== '') ? (float)$rawRadius : null;
 $RADII      = [0.5, 1, 2, 5, 10];
 $HOME_FEE   = 80;
 $domicilio  = (int)($b['domicilio'] ?? 0);
@@ -28,15 +29,16 @@ if ($showModal) {
     unset($_SESSION['booking']['show_modal']);
 }
 
-// Search notaries via API
-$qs = http_build_query([
+// Search notaries via API (only when radius is set)
+$qsArr = [
     'id_servicio' => $b['service_id'],
     'fecha'       => $b['date'],
     'lat'         => $b['lat'],
     'lng'         => $b['lng'],
-    'radio'       => $radius,
     'domicilio'   => $domicilio,
-]);
+];
+if ($radius !== null) $qsArr['radio'] = $radius;
+$qs = http_build_query($qsArr);
 $res      = api_json('GET', "/notarias/buscar?$qs");
 $notaries = $res['success'] ? ($res['data'] ?? []) : [];
     $apiErr   = $res['success'] ? '' : ($res['message'] ?? 'No se pudieron cargar los notarios.');
@@ -118,26 +120,27 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
         <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
         <span class="text-[11px] font-extrabold uppercase tracking-wider">Radio de búsqueda</span>
       </div>
-      <form method="get" id="radiusForm" class="flex items-center gap-2">
-        <div class="flex-1 flex items-center gap-1 bg-slate-100 rounded-full p-1">
+      <form method="get" id="radiusForm">
+        <div class="flex items-center gap-1.5 bg-slate-100 rounded-full p-1">
           <?php foreach ($RADII as $i => $r):
-            $active = $r == $radius;
+            $active = $radius !== null && $r == $radius;
           ?>
-            <label class="flex-1 cursor-pointer text-center px-2 py-1.5 rounded-full text-xs font-bold transition select-none
+            <label class="rad-pill flex-1 cursor-pointer text-center px-2 py-1.5 rounded-full text-xs font-bold transition select-none
                    <?= $active
-                     ? 'bg-blue-700 text-white shadow-sm'
+                     ? 'bg-blue-700 text-white shadow-sm ring-2 ring-blue-400 ring-offset-1 ring-offset-slate-100'
                      : 'text-slate-600 hover:bg-white hover:text-blue-700' ?>">
-              <input type="radio" name="radius" value="<?= $r ?>" class="sr-only"
+              <input type="radio" name="radius" value="<?= $r ?>" class="sr-only radius-radio"
                 <?= $active ? 'checked' : '' ?>>
               <?= $r < 1 ? ($r * 1000).' m' : $r.' km' ?>
             </label>
           <?php endforeach; ?>
         </div>
-        <button type="submit" form="radiusForm"
-          class="bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-bold
-                 rounded-full px-4 py-2.5 shadow-sm shadow-blue-700/30 transition
-                 inline-flex items-center gap-1.5 text-xs whitespace-nowrap">
-          <i data-lucide="search" class="w-3.5 h-3.5"></i>
+        <button type="submit" form="radiusForm" id="buscarBtn" disabled
+          class="w-full mt-3 bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold
+                 rounded-full py-2.5 shadow-sm shadow-blue-700/30 transition
+                 inline-flex items-center justify-center gap-1.5 text-sm
+                 disabled:opacity-40 disabled:pointer-events-none">
+          <i data-lucide="search" class="w-4 h-4"></i>
           Buscar
         </button>
       </form>
@@ -329,6 +332,26 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
     document.getElementById('priceModal').classList.remove('hidden');
     if (window.lucide) lucide.createIcons();
     <?php endif; ?>
+
+    // ── Radius pills: enable Buscar button + apply circular ring when selected ──
+    const buscarBtn = document.getElementById('buscarBtn');
+    document.querySelectorAll('.rad-pill').forEach(label => {
+      const radio = label.querySelector('.radius-radio');
+      radio.addEventListener('change', () => {
+        // Remove ring + selection from all pills
+        document.querySelectorAll('.rad-pill').forEach(l => {
+          l.classList.remove('bg-blue-700','text-white','shadow-sm','ring-2','ring-blue-400','ring-offset-1','ring-offset-slate-100');
+          l.classList.add('text-slate-600');
+        });
+        // Apply to the selected one
+        label.classList.remove('text-slate-600');
+        label.classList.add('bg-blue-700','text-white','shadow-sm','ring-2','ring-blue-400','ring-offset-1','ring-offset-slate-100');
+        // Enable Buscar button
+        buscarBtn.disabled = false;
+      });
+    });
+    // Initialize button state based on whether any radio is pre-checked (e.g. after page reload with ?radius=X)
+    if (document.querySelector('.radius-radio:checked')) buscarBtn.disabled = false;
 
     document.querySelectorAll('.notary-card input').forEach(radio => {
       radio.addEventListener('change', () => {
