@@ -187,7 +187,7 @@ $todayD  = (int)date('j');
       <div class="flex gap-3">
       <?php foreach ([            ['notary','building-2','En la notaría',0],['home','home','A mi domicilio',1]] as [$key,$icon,$lbl,$val]): ?>
           <label class="place-opt flex-1 flex flex-col items-center justify-center gap-3 aspect-[5/4] bg-white rounded-xl py-4 px-3 border-[1.5px] border-slate-200 cursor-pointer transition text-center" data-val="<?= $val ?>" data-key="<?= $key ?>">
-            <input type="radio" name="_place" value="<?= $key ?>" class="sr-only" <?= $key === 'notary' ? 'checked' : '' ?> />
+            <input type="radio" name="_place" value="<?= $key ?>" class="sr-only" />
             <i data-lucide="<?= $icon ?>" class="place-icon w-12 h-12 text-slate-500 transition"></i>
             <span class="place-label text-xs font-semibold text-slate-700 transition"><?= $lbl ?></span>
           </label>
@@ -195,11 +195,17 @@ $todayD  = (int)date('j');
       </div>
     </div>
 
-    <button type="submit" id="continueBtn"
-      class="w-full mt-auto bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold
-             rounded-2xl py-4 shadow-lg shadow-blue-700/30 transition">
-      Continuar →
-    </button>
+    <div class="mt-auto flex flex-col gap-2">
+      <p id="missingHint" class="hidden text-center text-xs text-slate-500">
+        Completa los pasos para continuar
+      </p>
+      <button type="submit" id="continueBtn" disabled
+        class="w-full bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold
+               rounded-2xl py-4 shadow-lg shadow-blue-700/30 transition
+               disabled:opacity-40 disabled:pointer-events-none">
+        Continuar →
+      </button>
+    </div>
   </form>
 
   <script>
@@ -256,6 +262,12 @@ $todayD  = (int)date('j');
     let calYear  = <?= $todayY ?>;
     let calMonth = <?= $todayM ?>;
 
+    // User-interaction flags — button only enables after user actively picks all 3
+    let dateTouched  = false;
+    let timeTouched  = false;
+    let placeTouched = false;
+    let internalBuild = false;  // distinguishes auto-fill vs user action in buildTime
+
     const hidDate = document.getElementById('hidDate');
     const hidTime = document.getElementById('hidTime');
     const hidDom  = document.getElementById('hidDom');
@@ -286,6 +298,7 @@ $todayD  = (int)date('j');
         card.querySelector('.opt-radio').classList.add('border-blue-700');
         card.querySelector('.opt-dot').classList.remove('hidden');
 
+        dateTouched = true;
         const opt = r.value;
         document.getElementById('calendarWrap').classList.toggle('hidden', opt !== 'custom');
         const timeSec = document.getElementById('timeSection');
@@ -306,7 +319,6 @@ $todayD  = (int)date('j');
           }, 200);
         }
       });
-      if (r.checked) r.dispatchEvent(new Event('change'));
     });
 
     // ── Mini calendar ─────────────────────────────────────────────────────────
@@ -332,6 +344,7 @@ $todayD  = (int)date('j');
     }
 
     function selectCalDay(iso) {
+      dateTouched = true;
       selectedDate = iso;
       renderCal();
       refreshTimePicker(selectedDate);
@@ -382,17 +395,21 @@ $todayD  = (int)date('j');
       const stillValid = [...sel.options].some(o => parseInt(o.value) === prevH);
       sel.value = stillValid ? prevH : (firstAvail ?? 1);
 
+      internalBuild = true;
       buildTime();
+      internalBuild = false;
     }
 
     function setAmpm(p) {
       if (document.getElementById('btn' + p).disabled) return;
+      timeTouched = true;
       selectedAmpm = p;
       refreshTimePicker(selectedDate);
       updateSummary();
     }
 
     function buildTime() {
+      if (!internalBuild) timeTouched = true;
       const customWrap = document.getElementById('customTimeWrap');
       if (customWrap.classList.contains('hidden') &&
           document.getElementById('periodSel').value === 'custom') {
@@ -411,6 +428,7 @@ $todayD  = (int)date('j');
 
     function onPeriodChange() {
       const period = document.getElementById('periodSel').value;
+      if (period) timeTouched = true;
       const customWrap = document.getElementById('customTimeWrap');
       const display = document.getElementById('timeDisplay');
       const loc = document.getElementById('locSection');
@@ -490,9 +508,9 @@ $todayD  = (int)date('j');
         card.querySelector('.place-label').classList.remove('text-slate-700');
         card.querySelector('.place-label').classList.add('text-blue-700');
         hidDom.value = card.dataset.val;
+        placeTouched = true;
         updateSummary();
       });
-      if (r.checked) r.dispatchEvent(new Event('change'));
     });
 
     function confirmHome() { document.getElementById('homeModal').classList.add('hidden'); }
@@ -506,6 +524,12 @@ $todayD  = (int)date('j');
     // ── Summary & validation ──────────────────────────────────────────────────
     function updateSummary() {
       hidDate.value = selectedDate;
+      // Enable continue button ONLY when user has actively selected:
+      // 1. fecha (dateTouched), 2. disponibilidad/hora (timeTouched), 3. lugar (placeTouched)
+      const ready = !!(dateTouched && timeTouched && placeTouched);
+      btn.disabled = !ready;
+      const hint = document.getElementById('missingHint');
+      if (hint) hint.classList.toggle('hidden', ready);
     }
 
     updateSummary();
