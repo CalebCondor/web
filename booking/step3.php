@@ -39,6 +39,33 @@ function distLabel($km): string {
     if ($km === null) return '?';
     return $km < 1 ? round($km * 1000).' m de distancia' : number_format($km, 1).' km de distancia';
 }
+
+// Format date for the modal summary
+$dateLabel = '';
+if (!empty($b['date'])) {
+    $meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    $dias  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+    $ts       = strtotime($b['date']);
+    $todayT   = strtotime(date('Y-m-d'));
+    $tomT     = strtotime('+1 day', $todayT);
+    $base     = $dias[(int)date('w', $ts)] . ', ' . $meses[(int)date('n', $ts) - 1] . ' ' . date('j', $ts);
+    if ($ts === $todayT)      $dateLabel = 'Hoy, '     . $base;
+    elseif ($ts === $tomT)    $dateLabel = 'Mañana, '  . $base;
+    else                      $dateLabel = $base;
+}
+
+// Format time HH:MM → H:MM AM/PM
+$timeLabel = '';
+if (!empty($b['time'])) {
+    $parts = explode(':', $b['time']);
+    $h = (int)($parts[0] ?? 0);
+    $m = $parts[1] ?? '00';
+    $ampm = $h >= 12 ? 'PM' : 'AM';
+    $h12  = $h % 12; if ($h12 === 0) $h12 = 12;
+    $timeLabel = $h12 . ':' . $m . ' ' . $ampm;
+}
+
+$locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -168,27 +195,87 @@ function distLabel($km): string {
     <?php endif; ?>
   </div>
 
-  <!-- Price Summary Modal -->
+  <!-- Booking Summary + Price Modal -->
   <div id="priceModal" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-black/50 px-4 pb-6"
        onclick="if(event.target===this) closeModal()">
     <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
-      <div class="bg-blue-700 px-5 py-3.5">
-        <p class="text-white font-extrabold text-base">Resumen del Precio</p>
+      <div class="bg-blue-700 px-5 py-3.5 flex items-center gap-2">
+        <i data-lucide="clipboard-list" class="w-5 h-5 text-white"></i>
+        <p class="text-white font-extrabold text-base">Resumen de tu reserva</p>
       </div>
-      <div class="px-5 py-4 flex flex-col gap-2.5 text-sm">
-        <div class="flex justify-between">
-          <span class="text-slate-500">Tarifa del notario</span>
-          <span id="mBase" class="font-semibold text-slate-900">—</span>
+
+      <div class="px-5 py-4 flex flex-col gap-3.5">
+        <!-- Booking details -->
+        <div class="flex flex-col gap-2.5">
+          <?php if (!empty($b['service_name'])): ?>
+          <div class="flex items-start gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+              <i data-lucide="file-text" class="w-4 h-4"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Servicio</p>
+              <p class="text-sm font-bold text-slate-900 leading-snug"><?= htmlspecialchars($b['service_name']) ?></p>
+            </div>
+          </div>
+          <?php endif; ?>
+
+          <?php if ($dateLabel): ?>
+          <div class="flex items-start gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+              <i data-lucide="calendar" class="w-4 h-4"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Fecha</p>
+              <p class="text-sm font-bold text-slate-900"><?= htmlspecialchars($dateLabel) ?></p>
+            </div>
+          </div>
+          <?php endif; ?>
+
+          <?php if ($timeLabel): ?>
+          <div class="flex items-start gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+              <i data-lucide="clock" class="w-4 h-4"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Hora</p>
+              <p class="text-sm font-bold text-slate-900"><?= htmlspecialchars($timeLabel) ?></p>
+            </div>
+          </div>
+          <?php endif; ?>
+
+          <div class="flex items-start gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+              <i data-lucide="<?= $domicilio ? 'home' : 'building-2' ?>" class="w-4 h-4"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lugar</p>
+              <p class="text-sm font-bold text-slate-900"><?= htmlspecialchars($locationLabel) ?></p>
+            </div>
+          </div>
         </div>
-        <div id="mHomeFee" class="hidden flex justify-between items-center">
-          <span class="text-slate-500 inline-flex items-center gap-1.5"><i data-lucide="home" class="w-3.5 h-3.5"></i> Cargo por visita a domicilio</span>
-          <span id="mHomeFeeVal" class="font-semibold text-orange-600">—</span>
-        </div>
-        <div class="flex justify-between pt-2.5 border-t border-slate-200">
-          <span class="font-extrabold text-slate-900">Total</span>
-          <span id="mTotal" class="font-extrabold text-blue-700 text-lg">—</span>
+
+        <!-- Divider -->
+        <div class="border-t border-dashed border-slate-200"></div>
+
+        <!-- Price details -->
+        <div class="flex flex-col gap-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Tarifa del notario</span>
+            <span id="mBase" class="font-semibold text-slate-900">—</span>
+          </div>
+          <div id="mHomeFee" class="hidden flex justify-between items-center">
+            <span class="text-slate-500 inline-flex items-center gap-1.5">
+              <i data-lucide="home" class="w-3.5 h-3.5"></i> Cargo por visita a domicilio
+            </span>
+            <span id="mHomeFeeVal" class="font-semibold text-orange-600">—</span>
+          </div>
+          <div class="flex justify-between pt-2.5 border-t border-slate-200">
+            <span class="font-extrabold text-slate-900">Total</span>
+            <span id="mTotal" class="font-extrabold text-blue-700 text-lg">—</span>
+          </div>
         </div>
       </div>
+
       <div class="flex gap-3 px-5 pb-5">
         <button type="button" onclick="closeModal()"
           class="flex-1 border-[1.5px] border-slate-300 text-slate-600 font-semibold rounded-2xl py-3.5 hover:bg-slate-50 active:scale-95 transition text-sm">

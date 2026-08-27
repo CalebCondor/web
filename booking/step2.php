@@ -413,9 +413,6 @@ $todayD  = (int)date('j');
       document.getElementById('timeDisplay').textContent =
         'Seleccionado: ' + String(h).padStart(2,'0') + ':00 ' + selectedAmpm;
       updateSummary();
-      if (selectedDate) {
-        revealSection(document.getElementById('locSection'));
-      }
     }
 
     function onPeriodChange() {
