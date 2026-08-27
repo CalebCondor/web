@@ -114,30 +114,33 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
   <!-- Radius filter -->
   <div class="w-full max-w-sm mx-auto px-4 pb-3">
     <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-      <div class="flex items-center gap-1.5 text-slate-500 mb-2">
+      <div class="flex items-center gap-1.5 text-slate-500 mb-2.5">
         <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
-        <span class="text-[11px] font-extrabold uppercase tracking-wider">Radio</span>
+        <span class="text-[11px] font-extrabold uppercase tracking-wider">Radio de búsqueda</span>
       </div>
-      <form method="get" id="radiusForm" class="flex items-center gap-1.5 bg-slate-100 rounded-full p-1">
-        <?php foreach ($RADII as $i => $r):
-          $active = $r == $radius;
-        ?>
-          <label class="flex-1 cursor-pointer text-center px-2 py-1.5 rounded-full text-xs font-bold transition select-none
-                 <?= $active
-                   ? 'bg-blue-700 text-white shadow-sm'
-                   : 'text-slate-600 hover:bg-white hover:text-blue-700' ?>">
-            <input type="radio" name="radius" value="<?= $r ?>" class="sr-only"
-              <?= $active ? 'checked' : '' ?> onchange="document.getElementById('radiusForm').submit()">
-            <?= $r < 1 ? ($r * 1000).' m' : $r.' km' ?>
-          </label>
-        <?php endforeach; ?>
+      <form method="get" id="radiusForm" class="flex items-center gap-2">
+        <div class="flex-1 flex items-center gap-1 bg-slate-100 rounded-full p-1">
+          <?php foreach ($RADII as $i => $r):
+            $active = $r == $radius;
+          ?>
+            <label class="flex-1 cursor-pointer text-center px-2 py-1.5 rounded-full text-xs font-bold transition select-none
+                   <?= $active
+                     ? 'bg-blue-700 text-white shadow-sm'
+                     : 'text-slate-600 hover:bg-white hover:text-blue-700' ?>">
+              <input type="radio" name="radius" value="<?= $r ?>" class="sr-only"
+                <?= $active ? 'checked' : '' ?>>
+              <?= $r < 1 ? ($r * 1000).' m' : $r.' km' ?>
+            </label>
+          <?php endforeach; ?>
+        </div>
+        <button type="submit" form="radiusForm"
+          class="bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-bold
+                 rounded-full px-4 py-2.5 shadow-sm shadow-blue-700/30 transition
+                 inline-flex items-center gap-1.5 text-xs whitespace-nowrap">
+          <i data-lucide="search" class="w-3.5 h-3.5"></i>
+          Buscar
+        </button>
       </form>
-
-      <button type="submit" form="radiusForm"
-        class="w-full mt-3 bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold
-               rounded-2xl py-4 shadow-lg shadow-blue-700/30 transition">
-        Buscar →
-      </button>
     </div>
   </div>
 
