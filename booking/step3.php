@@ -211,10 +211,10 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
       </div>
 
       <div class="px-5 py-4 flex flex-col gap-3.5">
-        <!-- Booking details -->
-        <div class="flex flex-col gap-2.5">
+        <!-- Booking details (2x2 grid) -->
+        <div class="grid grid-cols-2 gap-2.5">
           <?php if (!empty($b['service_name'])): ?>
-          <div class="flex items-start gap-2.5">
+          <div class="flex items-start gap-2.5 bg-slate-50 rounded-xl p-3">
             <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
               <i data-lucide="file-text" class="w-4 h-4"></i>
             </div>
@@ -226,7 +226,7 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
           <?php endif; ?>
 
           <?php if ($dateLabel): ?>
-          <div class="flex items-start gap-2.5">
+          <div class="flex items-start gap-2.5 bg-slate-50 rounded-xl p-3">
             <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
               <i data-lucide="calendar" class="w-4 h-4"></i>
             </div>
@@ -238,7 +238,7 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
           <?php endif; ?>
 
           <?php if ($timeLabel): ?>
-          <div class="flex items-start gap-2.5">
+          <div class="flex items-start gap-2.5 bg-slate-50 rounded-xl p-3">
             <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
               <i data-lucide="clock" class="w-4 h-4"></i>
             </div>
@@ -249,8 +249,8 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
           </div>
           <?php endif; ?>
 
-          <div class="flex items-start gap-2.5">
-            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+          <div class="flex items-start gap-2.5 bg-slate-50 rounded-xl p-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-700 text-white flex items-center justify-center shrink-0">
               <i data-lucide="<?= $domicilio ? 'home' : 'building-2' ?>" class="w-4 h-4"></i>
             </div>
             <div class="min-w-0">
