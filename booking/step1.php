@@ -244,6 +244,17 @@ function svcIcon(string $n): string {
 
     requestLocation();
 
+    // Toggle "Ver más servicios"
+    function toggleMoreServices() {
+      const wrap  = document.getElementById('moreServices');
+      const label = document.getElementById('toggleMoreLabel');
+      const btn   = document.getElementById('toggleMore');
+      const open  = wrap.classList.toggle('hidden');
+      label.textContent = open ? 'Ver más servicios' : 'Ver menos';
+      btn.querySelector('i').setAttribute('data-lucide', open ? 'plus-circle' : 'minus-circle');
+      if (window.lucide) lucide.createIcons({ nameAttr: 'data-lucide' });
+    }
+
     // Service selection styling
     document.querySelectorAll('.svc-card input[type="radio"]').forEach(radio => {
       radio.addEventListener('change', () => {
