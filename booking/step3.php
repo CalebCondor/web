@@ -90,9 +90,16 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
 
 
 
+  <!-- Page intro -->
+  <div class="w-full max-w-sm mx-auto px-4 pt-5 pb-3">
+    <h1 class="text-sm font-bold text-blue-900 uppercase tracking-wide mb-2">Notarios Disponibles</h1>
+    <h2 class="text-lg font-extrabold text-slate-900 mb-2">¡Listo! Ahora vamos a encontrar tu notario</h2>
+    <p class="text-sm text-slate-500">Escoge una opción para encontrar el notario más cerca de ti.</p>
+  </div>
+
   <!-- Radius filter -->
-  <div class="bg-white border-b border-slate-200 py-3">
-    <div class="max-w-sm mx-auto px-4">
+  <div class="w-full max-w-sm mx-auto px-4 pb-3">
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
       <div class="flex items-center gap-1.5 text-slate-500 mb-2">
         <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
         <span class="text-[11px] font-extrabold uppercase tracking-wider">Radio</span>
@@ -111,19 +118,14 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
           </label>
         <?php endforeach; ?>
       </form>
+
+      <button type="submit" form="radiusForm"
+        class="w-full mt-3 bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold
+               rounded-2xl py-4 shadow-lg shadow-blue-700/30 transition">
+        Buscar →
+      </button>
     </div>
-
-    <button type="submit" form="radiusForm"
-      class="w-full mt-4 bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold
-             rounded-2xl py-4 shadow-lg shadow-blue-700/30 transition">
-      Buscar →
-    </button>
   </div>
-
-  <div class="flex-1 w-full max-w-sm mx-auto px-4 py-5">
-    <h1 class="text-sm font-bold text-blue-900 uppercase tracking-wide mb-2">Notarios Disponibles</h1>
-    <h2 class="text-lg font-extrabold text-slate-900 mb-1">¡Listo! Ahora vamos a encontrar tu notario</h2>
-    <p class="text-sm text-slate-500 mb-4">Escoge una opción para encontrar el notario más cerca de ti.</p>
 
     <?php if ($apiErr): ?>
       <div class="flex flex-col items-center py-16 gap-3">
