@@ -26,19 +26,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $raw      = api_json('GET', '/servicios');
 $services = isset($raw[0]) ? $raw : ($raw['data'] ?? []);
 
-// Keywords for the 3 always-visible services (one per keyword, in order)
-$featuredKeywords = ['affidavit', 'poder', 'living will'];
+// 3 featured services — exact names as returned by the API
+$featuredNames = ['affidabbit', 'poderes', 'living while'];
 
 $featured = [];
 $others   = [];
 $used     = [];
-foreach ($featuredKeywords as $kw) {
+foreach ($featuredNames as $target) {
     foreach ($services as $svc) {
-        $name = strtolower($svc['nombre'] ?? '');
-        if (str_contains($name, $kw)) {
+        if (strtolower(trim($svc['nombre'] ?? '')) === $target) {
             $featured[] = $svc;
             $used[]     = (int)($svc['id_servicio'] ?? 0);
-            break; // take only the first match per keyword
+            break;
         }
     }
 }
@@ -50,13 +49,16 @@ foreach ($services as $svc) {
 
 function svcIcon(string $n): string {
     $l = strtolower($n);
-    if (str_contains($l, 'escritura'))  return '<i data-lucide="scroll" class="w-6 h-6"></i>';
-    if (str_contains($l, 'firma'))      return '<i data-lucide="pen-line" class="w-6 h-6"></i>';
-    if (str_contains($l, 'testamento')) return '<i data-lucide="file-text" class="w-6 h-6"></i>';
-    if (str_contains($l, 'poder'))      return '<i data-lucide="scale" class="w-6 h-6"></i>';
-    if (str_contains($l, 'hipoteca'))   return '<i data-lucide="home" class="w-6 h-6"></i>';
-    if (str_contains($l, 'sociedad'))   return '<i data-lucide="building" class="w-6 h-6"></i>';
-    if (str_contains($l, 'divorcio'))   return '<i data-lucide="briefcase" class="w-6 h-6"></i>';
+    if (str_contains($l, 'affidav') || str_contains($l, 'afidav')) return '<i data-lucide="pen-line" class="w-6 h-6"></i>';
+    if (str_contains($l, 'escritura'))   return '<i data-lucide="scroll" class="w-6 h-6"></i>';
+    if (str_contains($l, 'firma'))       return '<i data-lucide="pen-line" class="w-6 h-6"></i>';
+    if (str_contains($l, 'testamento'))  return '<i data-lucide="file-text" class="w-6 h-6"></i>';
+    if (str_contains($l, 'living'))      return '<i data-lucide="heart-pulse" class="w-6 h-6"></i>';
+    if (str_contains($l, 'poder'))       return '<i data-lucide="scale" class="w-6 h-6"></i>';
+    if (str_contains($l, 'hipoteca'))    return '<i data-lucide="home" class="w-6 h-6"></i>';
+    if (str_contains($l, 'sociedad'))    return '<i data-lucide="building" class="w-6 h-6"></i>';
+    if (str_contains($l, 'divorcio'))    return '<i data-lucide="briefcase" class="w-6 h-6"></i>';
+    if (str_contains($l, 'legaliz'))     return '<i data-lucide="stamp" class="w-6 h-6"></i>';
     return '<i data-lucide="building-2" class="w-6 h-6"></i>';
 }
 ?>
