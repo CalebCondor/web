@@ -129,7 +129,7 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
           ?>
             <label data-val="<?= $r ?>" class="rad-pill flex-1 cursor-pointer text-center px-2 py-1.5 rounded-full text-xs font-bold transition select-none
                    <?= $active
-                     ? 'bg-blue-700 text-white shadow-sm ring-2 ring-blue-400 ring-offset-1 ring-offset-slate-100'
+                     ? 'bg-blue-700 text-white shadow-sm ring-blue-400 ring-offset-1 ring-offset-slate-100'
                      : 'text-slate-600 hover:bg-white hover:text-blue-700' ?>">
               <input type="radio" name="radius" value="<?= $r ?>" class="sr-only radius-radio"
                 <?= $active ? 'checked' : '' ?>>
