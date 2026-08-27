@@ -313,7 +313,7 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
           <input type="hidden" name="notary_json" id="modalNotaryField" value="" />
           <button type="submit" id="confirmBtn" disabled
             onclick="document.getElementById('modalNotaryField').value=document.getElementById('hidNotary').value"
-            class="w-full bg-blue-300 cursor-not-allowed text-white font-extrabold rounded-2xl py-3.5 transition text-sm">
+            class="w-full bg-blue-300 text-white font-extrabold rounded-2xl py-3.5 transition text-sm cursor-not-allowed disabled:cursor-not-allowed">
             Selecciona un notario
           </button>
         </form>
@@ -413,10 +413,17 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
 
         hidNotary.value = card.dataset.json;
 
-        // Enable the continue button
+        // Enable the main continue button (outside modal)
         const contBtn = document.getElementById('continueBtn');
         contBtn.disabled = false;
         contBtn.className = 'w-full bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold rounded-2xl py-4 shadow-lg shadow-blue-700/30 transition text-base';
+
+        // Enable the modal confirm button + sync the hidden notary JSON field
+        const confirmBtn = document.getElementById('confirmBtn');
+        confirmBtn.disabled = false;
+        confirmBtn.className = 'w-full bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold rounded-2xl py-3.5 transition text-sm cursor-pointer';
+        confirmBtn.textContent = 'Continuar';
+        document.getElementById('modalNotaryField').value = hidNotary.value;
       });
     });
 
