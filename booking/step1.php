@@ -26,19 +26,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $raw      = api_json('GET', '/servicios');
 $services = isset($raw[0]) ? $raw : ($raw['data'] ?? []);
 
-// Keywords for the 3 always-visible services
+// Keywords for the 3 always-visible services (one per keyword, in order)
 $featuredKeywords = ['affidavit', 'poder', 'living will'];
 
 $featured = [];
 $others   = [];
-foreach ($services as $svc) {
-    $name = strtolower($svc['nombre'] ?? '');
-    $isFeatured = false;
-    foreach ($featuredKeywords as $kw) {
-        if (str_contains($name, $kw)) { $isFeatured = true; break; }
+$used     = [];
+foreach ($featuredKeywords as $kw) {
+    foreach ($services as $svc) {
+        $name = strtolower($svc['nombre'] ?? '');
+        if (str_contains($name, $kw)) {
+            $featured[] = $svc;
+            $used[]     = (int)($svc['id_servicio'] ?? 0);
+            break; // take only the first match per keyword
+        }
     }
-    if ($isFeatured) $featured[] = $svc;
-    else             $others[]   = $svc;
+}
+foreach ($services as $svc) {
+    if (!in_array((int)($svc['id_servicio'] ?? 0), $used, true)) {
+        $others[] = $svc;
+    }
 }
 
 function svcIcon(string $n): string {
