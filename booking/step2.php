@@ -124,9 +124,6 @@ $todayD  = (int)date('j');
               <p class="opt-label font-bold text-slate-900 text-sm"><?= $label ?></p>
               <p class="text-xs text-slate-400"><?= $sub ?></p>
             </div>
-            <div class="opt-radio w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0">
-              <div class="opt-dot w-2.5 h-2.5 rounded-full bg-blue-700 hidden"></div>
-            </div>
           </label>
         <?php endforeach; ?>
       </div>
@@ -286,17 +283,15 @@ $todayD  = (int)date('j');
       r.addEventListener('change', () => {
         document.querySelectorAll('.date-opt').forEach(c => {
           c.classList.remove('border-blue-600','bg-blue-50');
-          c.querySelector('.opt-icon').classList.remove('bg-blue-100');
+          c.querySelector('.opt-icon').classList.remove('bg-blue-100','text-blue-700');
+          c.querySelector('.opt-icon').classList.add('bg-slate-100','text-slate-600');
           c.querySelector('.opt-label').classList.remove('text-blue-700');
-          c.querySelector('.opt-radio').classList.remove('border-blue-700');
-          c.querySelector('.opt-dot').classList.add('hidden');
         });
         const card = r.closest('.date-opt');
         card.classList.add('border-blue-600','bg-blue-50');
-        card.querySelector('.opt-icon').classList.add('bg-blue-100');
+        card.querySelector('.opt-icon').classList.remove('bg-slate-100','text-slate-600');
+        card.querySelector('.opt-icon').classList.add('bg-blue-100','text-blue-700');
         card.querySelector('.opt-label').classList.add('text-blue-700');
-        card.querySelector('.opt-radio').classList.add('border-blue-700');
-        card.querySelector('.opt-dot').classList.remove('hidden');
 
         dateTouched = true;
         const opt = r.value;
