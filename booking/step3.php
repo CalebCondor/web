@@ -127,7 +127,7 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
           <?php foreach ($RADII as $i => $r):
             $active = $radius !== null && $r == $radius;
           ?>
-            <label class="rad-pill flex-1 cursor-pointer text-center px-2 py-1.5 rounded-full text-xs font-bold transition select-none
+            <label data-val="<?= $r ?>" class="rad-pill flex-1 cursor-pointer text-center px-2 py-1.5 rounded-full text-xs font-bold transition select-none
                    <?= $active
                      ? 'bg-blue-700 text-white shadow-sm ring-2 ring-blue-400 ring-offset-1 ring-offset-slate-100'
                      : 'text-slate-600 hover:bg-white hover:text-blue-700' ?>">
@@ -335,29 +335,63 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
     if (window.lucide) lucide.createIcons();
     <?php endif; ?>
 
-    // ── Radius pills: enable Buscar button + apply circular ring when selected ──
-    const buscarBtn = document.getElementById('buscarBtn');
-    const sel = 'bg-blue-700 text-white shadow-sm ring-2 ring-blue-400 ring-offset-1 ring-offset-slate-100';
-    const unsel = 'text-slate-600';
+    // ── Radius pills: 2 visual states ──────────────────────────────────────────
+    //  • APPLIED (current $radius from PHP): blue solid + ring  (the actual current search)
+    //  • PENDING (just clicked, not yet searched): outline blue (preview of next search)
+    //  • NORMAL: gray
+    // Only the APPLIED one stays visually solid. When user picks a different radio,
+    // it gets PENDING style until Buscar is clicked — then it becomes APPLIED.
+    const buscarBtn     = document.getElementById('buscarBtn');
+    const APPLIED_CLS   = 'bg-blue-700 text-white shadow-sm ring-2 ring-blue-400 ring-offset-1 ring-offset-slate-100';
+    const PENDING_CLS   = 'bg-white text-blue-700 border-2 border-blue-700 shadow-sm';
+    const NORMAL_CLS    = 'text-slate-600';
+
+    // The currently-applied radius value (from PHP). null on first visit.
+    const appliedVal = <?= $radius !== null ? (float)$radius : 'null' ?>;
+
+    function clearAll() {
+      document.querySelectorAll('.rad-pill').forEach(l => {
+        l.classList.remove(...APPLIED_CLS.split(' '), ...PENDING_CLS.split(' '));
+        l.classList.add(NORMAL_CLS);
+      });
+    }
+    function applyApplied() {
+      clearAll();
+      document.querySelectorAll('.rad-pill').forEach(l => {
+        if (parseFloat(l.dataset.val) === appliedVal) {
+          l.classList.remove(NORMAL_CLS);
+          l.classList.add(...APPLIED_CLS.split(' '));
+        }
+      });
+    }
+
     document.querySelectorAll('.rad-pill').forEach(label => {
       const radio = label.querySelector('.radius-radio');
       radio.addEventListener('change', () => {
-        // Only react when THIS radio becomes checked (ignore the uncheck event of the previously selected one)
         if (!radio.checked) return;
-        // Reset all pills
-        document.querySelectorAll('.rad-pill').forEach(l => {
-          l.classList.remove(...sel.split(' '));
-          l.classList.add(unsel);
-        });
-        // Apply to the selected one
-        label.classList.remove(unsel);
-        label.classList.add(...sel.split(' '));
-        // Enable Buscar button
+        // Reset all
+        clearAll();
+        // Restore APPLIED on the original (if it wasn't the clicked one)
+        if (appliedVal !== null) {
+          document.querySelectorAll('.rad-pill').forEach(l => {
+            if (parseFloat(l.dataset.val) === appliedVal) {
+              l.classList.remove(NORMAL_CLS);
+              l.classList.add(...APPLIED_CLS.split(' '));
+            }
+          });
+        }
+        // Mark this one as PENDING (unless it's already the applied one)
+        if (parseFloat(label.dataset.val) !== appliedVal) {
+          label.classList.remove(NORMAL_CLS);
+          label.classList.add(...PENDING_CLS.split(' '));
+        }
         buscarBtn.disabled = false;
       });
     });
-    // Initialize button state based on whether any radio is pre-checked (e.g. after page reload with ?radius=X)
-    if (document.querySelector('.radius-radio:checked')) buscarBtn.disabled = false;
+
+    // Initialize on load: ensure APPLIED radio keeps its style even after DOMContentLoaded
+    applyApplied();
+    if (appliedVal !== null) buscarBtn.disabled = false;
 
     document.querySelectorAll('.notary-card input').forEach(radio => {
       radio.addEventListener('change', () => {
