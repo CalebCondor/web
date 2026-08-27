@@ -93,60 +93,30 @@ function svcIcon(string $n): string {
       <input type="hidden" id="hidLng"  name="lng"          value="" />
       <input type="hidden" id="hidName" name="service_name" value="" />
 
-      <?php
-      // Build featured list (always-visible 3) preferring API data when present
-      $featured = [];
-      foreach ($defaultKeywords as $dk) {
-          $found = null;
-          foreach ($services as $svc) {
-              $nm = strtolower($svc['nombre'] ?? '');
-              if (str_contains($nm, $dk['kw'])) { $found = $svc; break; }
-          }
-          if ($found) {
-              $featured[] = [
-                  'id'     => (int)($found['id_servicio'] ?? 0),
-                  'name'   => $found['nombre']      ?? $dk['name'],
-                  'desc'   => $found['descripcion'] ?? $dk['desc'],
-                  'icon'   => '<i data-lucide="'.htmlspecialchars($dk['icon']).'" class="w-6 h-6"></i>',
-                  'source' => 'api',
-              ];
-          } else {
-              $featured[] = [
-                  'id'     => 0,
-                  'name'   => $dk['name'],
-                  'desc'   => $dk['desc'],
-                  'icon'   => '<i data-lucide="'.htmlspecialchars($dk['icon']).'" class="w-6 h-6"></i>',
-                  'source' => 'static',
-              ];
-          }
-      }
-
-      // Others = API services not already shown in featured
-      $featuredIds = array_filter(array_column($featured, 'id'));
-      $others = array_values(array_filter($services, fn($s) =>
-          !in_array((int)($s['id_servicio'] ?? 0), $featuredIds, true)
-          && !array_filter($defaultKeywords, fn($dk) => str_contains(strtolower($s['nombre'] ?? ''), $dk['kw']))
-      ));
-      ?>
-
       <?php foreach ($featured as $i => $svc):
+        $id    = (int)($svc['id_servicio'] ?? 0);
+        $name  = htmlspecialchars($svc['nombre']      ?? '');
+        $desc  = htmlspecialchars($svc['descripcion'] ?? '');
+        $icon  = svcIcon($svc['nombre'] ?? '');
         $first = $i === 0;
         $cardCls = $first
           ? 'svc-card relative flex items-center gap-4 bg-gradient-to-br from-blue-50 via-white to-white rounded-2xl p-4 border-[1.5px] border-blue-300 border-l-[5px] border-l-blue-700 shadow-md cursor-pointer transition select-none'
           : 'svc-card flex items-center gap-4 bg-white rounded-2xl p-4 border-[1.5px] border-slate-200 cursor-pointer transition select-none';
       ?>
         <label class="<?= $cardCls ?>" data-first="<?= $first ? '1' : '0' ?>">
-          <input type="radio" name="service_id" value="<?= (int)$svc['id'] ?>" class="sr-only"
-                 data-name="<?= htmlspecialchars($svc['name']) ?>" required />
+          <input type="radio" name="service_id" value="<?= $id ?>" class="sr-only"
+                 data-name="<?= $name ?>" required />
           <?php if ($first): ?>
             <i data-lucide="star" class="absolute top-3 right-3 w-4 h-4 text-yellow-500 fill-yellow-500"></i>
           <?php endif; ?>
           <div class="icon-wrap <?= $first ? 'w-14 h-14' : 'w-12 h-12' ?> rounded-xl <?= $first ? 'bg-blue-100' : 'bg-slate-100' ?> flex items-center justify-center text-2xl shrink-0 transition">
-            <?= $svc['icon'] ?>
+            <?= $icon ?>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="card-title font-bold <?= $first ? 'text-blue-900' : 'text-slate-900' ?> text-sm transition"><?= htmlspecialchars($svc['name']) ?></p>
-            <p class="text-xs text-slate-400 mt-0.5 line-clamp-2"><?= htmlspecialchars($svc['desc']) ?></p>
+            <p class="card-title font-bold <?= $first ? 'text-blue-900' : 'text-slate-900' ?> text-sm transition"><?= $name ?></p>
+            <?php if ($desc): ?>
+              <p class="text-xs text-slate-400 mt-0.5 line-clamp-2"><?= $desc ?></p>
+            <?php endif; ?>
           </div>
           <div class="radio-outer w-5 h-5 rounded-full border-2 <?= $first ? 'border-blue-400' : 'border-slate-300' ?> flex items-center justify-center shrink-0 transition">
             <div class="radio-dot w-2.5 h-2.5 rounded-full bg-blue-700 hidden"></div>
