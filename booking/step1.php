@@ -72,7 +72,7 @@ function svcIcon(string $n): string {
 <div class="w-full md:max-w-sm min-h-screen bg-slate-50 flex flex-col md:shadow-2xl relative">
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
-    <img src="../assets/LogoS2.png" alt="Notarize" class="h-11 w-auto brightness-0 invert">
+    <img src="../assets/LogoS2.png" alt="Notarize" class="h-11 w-auto">
   </div>
 
 

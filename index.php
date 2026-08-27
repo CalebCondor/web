@@ -46,9 +46,7 @@
       background: rgba(15, 23, 42, 0.55);
       z-index: 1;
     }
-    .logo-white {
-      filter: brightness(0) invert(1);
-    }
+  
   </style>
 </head>
 
