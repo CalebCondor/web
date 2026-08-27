@@ -337,17 +337,21 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
 
     // ── Radius pills: enable Buscar button + apply circular ring when selected ──
     const buscarBtn = document.getElementById('buscarBtn');
+    const sel = 'bg-blue-700 text-white shadow-sm ring-2 ring-blue-400 ring-offset-1 ring-offset-slate-100';
+    const unsel = 'text-slate-600';
     document.querySelectorAll('.rad-pill').forEach(label => {
       const radio = label.querySelector('.radius-radio');
       radio.addEventListener('change', () => {
-        // Remove ring + selection from all pills
+        // Only react when THIS radio becomes checked (ignore the uncheck event of the previously selected one)
+        if (!radio.checked) return;
+        // Reset all pills
         document.querySelectorAll('.rad-pill').forEach(l => {
-          l.classList.remove('bg-blue-700','text-white','shadow-sm','ring-2','ring-blue-400','ring-offset-1','ring-offset-slate-100');
-          l.classList.add('text-slate-600');
+          l.classList.remove(...sel.split(' '));
+          l.classList.add(unsel);
         });
         // Apply to the selected one
-        label.classList.remove('text-slate-600');
-        label.classList.add('bg-blue-700','text-white','shadow-sm','ring-2','ring-blue-400','ring-offset-1','ring-offset-slate-100');
+        label.classList.remove(unsel);
+        label.classList.add(...sel.split(' '));
         // Enable Buscar button
         buscarBtn.disabled = false;
       });
