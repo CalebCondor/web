@@ -10,9 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && preg_match('/^\d{2}:\d{2}$/', $time)) {
         $_SESSION['booking'] = array_merge($_SESSION['booking'], [
-            'date'      => $date,
-            'time'      => $time,
-            'domicilio' => $domicilio,
+            'date'        => $date,
+            'time'        => $time,
+            'domicilio'   => $domicilio,
+            'show_modal'  => true,
         ]);
         header('Location: step3.php'); exit;
     }
@@ -521,6 +522,7 @@ $todayD  = (int)date('j');
       if (!hidDate.value) hidDate.value = selectedDate || todayISO;
       if (!hidTime.value) buildTime();
     });
+
   </script>
 
   <!-- Home visit fee modal -->
