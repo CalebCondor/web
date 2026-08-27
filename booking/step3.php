@@ -342,7 +342,7 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
     // Only the APPLIED one stays visually solid. When user picks a different radio,
     // it gets PENDING style until Buscar is clicked — then it becomes APPLIED.
     const buscarBtn     = document.getElementById('buscarBtn');
-    const APPLIED_CLS   = 'bg-blue-700 text-white shadow-sm ring-2 ring-blue-400 ring-offset-1 ring-offset-slate-100';
+    const APPLIED_CLS   = 'bg-blue-700 text-white shadow-sm';
     const PENDING_CLS   = 'bg-white text-blue-700 border-2 border-blue-700 shadow-sm';
     const NORMAL_CLS    = 'text-slate-600';
 
