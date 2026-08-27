@@ -127,6 +127,9 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
     </div>
   </div>
 
+  <!-- Notaries list -->
+  <div class="w-full max-w-sm mx-auto px-4 py-4 flex flex-col gap-3">
+
     <?php if ($apiErr): ?>
       <div class="flex flex-col items-center py-16 gap-3">
         <i data-lucide="alert-triangle" class="w-12 h-12 text-red-400"></i>
