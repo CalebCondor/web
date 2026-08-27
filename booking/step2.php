@@ -75,7 +75,7 @@ $todayD  = (int)date('j');
     <input type="hidden" id="hidDom"  name="domicilio" value="0" />
 
     <!-- Progress stepper -->
-    <nav aria-label="progress" class="px-5 py-3">
+    <nav aria-label="progress" class="py-3">
       <!-- Progress bar -->
       <div class="flex items-center gap-1 mb-2">
         <div class="flex-1 h-1.5 rounded-full bg-blue-700"></div>
