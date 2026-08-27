@@ -26,12 +26,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $raw      = api_json('GET', '/servicios');
 $services = isset($raw[0]) ? $raw : ($raw['data'] ?? []);
 
-// Always-visible default services (3)
-$defaultKeywords = [
-    ['kw' => 'affidavit',  'icon' => 'pen-line',    'name' => 'Affidávit',                            'desc' => 'Declaración jurada escrita para uso legal oficial.'],
-    ['kw' => 'poder',      'icon' => 'scale',       'name' => 'Poderes',                              'desc' => 'Otorga a otra persona la autoridad para actuar en tu nombre.'],
-    ['kw' => 'living will', 'icon' => 'heart-pulse', 'name' => 'Living Will (Testamento vital)',       'desc' => 'Decide qué pasa si no puedes continuar viviendo o estar en coma.'],
-];
+// Keywords for the 3 always-visible services
+$featuredKeywords = ['affidavit', 'poder', 'living will'];
+
+$featured = [];
+$others   = [];
+foreach ($services as $svc) {
+    $name = strtolower($svc['nombre'] ?? '');
+    $isFeatured = false;
+    foreach ($featuredKeywords as $kw) {
+        if (str_contains($name, $kw)) { $isFeatured = true; break; }
+    }
+    if ($isFeatured) $featured[] = $svc;
+    else             $others[]   = $svc;
+}
 
 function svcIcon(string $n): string {
     $l = strtolower($n);
