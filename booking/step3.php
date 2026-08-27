@@ -90,6 +90,20 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
 
 
 
+  <!-- Progress stepper -->
+  <nav aria-label="progress" class="w-full max-w-sm mx-auto px-4 py-3">
+    <div class="flex items-center gap-1 mb-2">
+      <div class="flex-1 h-1.5 rounded-full bg-blue-700"></div>
+      <div class="flex-1 h-1.5 rounded-full bg-blue-700"></div>
+      <div class="flex-1 h-1.5 rounded-full bg-blue-700"></div>
+      <div class="flex-1 h-1.5 rounded-full bg-slate-200"></div>
+    </div>
+    <div class="flex items-center justify-between">
+      <span class="text-[10px] font-bold text-blue-700 uppercase tracking-wider">Paso 3 de 4</span>
+      <span class="text-xs font-extrabold text-slate-900">Notario</span>
+    </div>
+  </nav>
+
   <!-- Page intro -->
   <div class="w-full max-w-sm mx-auto px-4 pt-5 pb-3">
     <h1 class="text-sm font-bold text-blue-900 uppercase tracking-wide mb-2">Notarios Disponibles</h1>

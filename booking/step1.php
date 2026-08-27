@@ -79,6 +79,20 @@ function svcIcon(string $n): string {
 
   <div class="flex-1 w-full px-6 py-8">
 
+    <!-- Progress stepper -->
+    <nav aria-label="progress" class="py-3">
+      <div class="flex items-center gap-1 mb-2">
+        <div class="flex-1 h-1.5 rounded-full bg-blue-700"></div>
+        <div class="flex-1 h-1.5 rounded-full bg-slate-200"></div>
+        <div class="flex-1 h-1.5 rounded-full bg-slate-200"></div>
+        <div class="flex-1 h-1.5 rounded-full bg-slate-200"></div>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-[10px] font-bold text-blue-700 uppercase tracking-wider">Paso 1 de 4</span>
+        <span class="text-xs font-extrabold text-slate-900">Servicio</span>
+      </div>
+    </nav>
+
     <h1 class="text-sm font-bold text-blue-900 uppercase tracking-wide mb-2">Seleccionar Servicio</h1>
     <h2 class="text-2xl font-extrabold text-slate-900 leading-tight mb-1">
       ¿Qué tipo de servicio<br>notarial necesitas?
