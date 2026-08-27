@@ -19,6 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $rawRadius  = $_GET['radius'] ?? $b['radius'] ?? null;
 $radius     = ($rawRadius !== null && $rawRadius !== '') ? (float)$rawRadius : null;
+// Persist radius in session so it survives navigations
+if ($radius !== null) $_SESSION['booking']['radius'] = $radius;
 $RADII      = [0.5, 1, 2, 5, 10];
 $HOME_FEE   = 80;
 $domicilio  = (int)($b['domicilio'] ?? 0);
