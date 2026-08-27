@@ -74,27 +74,20 @@ $todayD  = (int)date('j');
     <input type="hidden" id="hidTime" name="time" value="" />
     <input type="hidden" id="hidDom"  name="domicilio" value="0" />
 
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="flex items-center justify-start gap-1.5 text-xs font-semibold flex-wrap pb-2">
-      <span class="flex items-center gap-1.5 text-slate-400">
-        <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[10px] font-extrabold">1</span>
-        Servicio
-      </span>
-      <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>
-      <span class="flex items-center gap-1.5 text-blue-700">
-        <span class="w-5 h-5 rounded-full bg-blue-700 text-white flex items-center justify-center text-[10px] font-extrabold">2</span>
-        Fecha y Hora
-      </span>
-      <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>
-      <span class="flex items-center gap-1.5 text-slate-400">
-        <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[10px] font-extrabold">3</span>
-        Notario
-      </span>
-      <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>
-      <span class="flex items-center gap-1.5 text-slate-400">
-        <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[10px] font-extrabold">4</span>
-        Pago
-      </span>
+    <!-- Progress stepper -->
+    <nav aria-label="progress" class="px-5 py-3">
+      <!-- Progress bar -->
+      <div class="flex items-center gap-1 mb-2">
+        <div class="flex-1 h-1.5 rounded-full bg-blue-700"></div>
+        <div class="flex-1 h-1.5 rounded-full bg-blue-700"></div>
+        <div class="flex-1 h-1.5 rounded-full bg-slate-200"></div>
+        <div class="flex-1 h-1.5 rounded-full bg-slate-200"></div>
+      </div>
+      <!-- Step label -->
+      <div class="flex items-center justify-between">
+        <span class="text-[10px] font-bold text-blue-700 uppercase tracking-wider">Paso 2 de 4</span>
+        <span class="text-xs font-extrabold text-slate-900">Fecha y Hora</span>
+      </div>
     </nav>
 
     <?php if (!empty($error)): ?>
