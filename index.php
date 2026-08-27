@@ -67,7 +67,7 @@
     <!-- Headline + subtitle -->
     <div class="text-center text-white">
       <h1 class="text-[30px] font-extrabold leading-tight tracking-tight mb-3 drop-shadow-lg">
-        Notariza tus<br>documentos en línea,<br>desde cualquier lugar.
+        Encuentra una<br>notaría cerca de ti,<br>al instante.
       </h1>
       <p class="text-sm text-white/80 leading-relaxed">
         Conecta con un notario certificado<br>

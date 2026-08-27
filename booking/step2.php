@@ -31,6 +31,35 @@ $todayD  = (int)date('j');
   <?php include '../_head.php'; ?>
 </head>
 <body class="bg-white md:bg-slate-200 min-h-screen flex justify-center">
+<style>
+  .fluid-section {
+    overflow: hidden;
+    max-height: 0;
+    min-height: 0;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 380ms ease-out, transform 380ms ease-out, max-height 500ms ease-out;
+  }
+  .fluid-section.fluid-shown {
+    max-height: 1200px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .fluid-pop {
+    animation: fluidPop 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes fluidPop {
+    0%   { opacity: 0; transform: translateY(14px) scale(0.98); }
+    60%  { opacity: 1; transform: translateY(-2px) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  #periodSel, #customTimeWrap {
+    transition: all 320ms ease-out;
+  }
+  #calendarWrap {
+    animation: fluidPop 380ms ease-out;
+  }
+</style>
 <div class="w-full md:max-w-sm min-h-screen bg-slate-50 flex flex-col md:shadow-2xl relative">
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
@@ -44,11 +73,28 @@ $todayD  = (int)date('j');
     <input type="hidden" id="hidTime" name="time" value="" />
     <input type="hidden" id="hidDom"  name="domicilio" value="0" />
 
-    <!-- Context chip -->
-    <div class="inline-flex self-start items-center gap-1.5 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full px-3 py-1.5">
-      <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
-      <?= htmlspecialchars($booking['service_name'] ?? '') ?>
-    </div>
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="flex items-center justify-start gap-1.5 text-xs font-semibold flex-wrap pb-2">
+      <span class="flex items-center gap-1.5 text-slate-400">
+        <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[10px] font-extrabold">1</span>
+        Servicio
+      </span>
+      <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>
+      <span class="flex items-center gap-1.5 text-blue-700">
+        <span class="w-5 h-5 rounded-full bg-blue-700 text-white flex items-center justify-center text-[10px] font-extrabold">2</span>
+        Fecha y Hora
+      </span>
+      <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>
+      <span class="flex items-center gap-1.5 text-slate-400">
+        <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[10px] font-extrabold">3</span>
+        Notario
+      </span>
+      <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>
+      <span class="flex items-center gap-1.5 text-slate-400">
+        <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[10px] font-extrabold">4</span>
+        Pago
+      </span>
+    </nav>
 
     <?php if (!empty($error)): ?>
       <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
@@ -78,7 +124,7 @@ $todayD  = (int)date('j');
           ] as [$key, $icon, $label, $sub]):
         ?>
           <label class="date-opt flex items-center gap-3 bg-white rounded-2xl p-4 border-[1.5px] border-slate-200 cursor-pointer transition" data-key="<?= $key ?>">
-            <input type="radio" name="_dateOpt" value="<?= $key ?>" class="sr-only" <?= $key === 'today' ? 'checked' : '' ?> />
+            <input type="radio" name="_dateOpt" value="<?= $key ?>" class="sr-only" />
             <div class="opt-icon w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 shrink-0 transition"><i data-lucide="<?= $icon ?>" class="w-5 h-5"></i></div>
             <div class="flex-1">
               <p class="opt-label font-bold text-slate-900 text-sm"><?= $label ?></p>
@@ -110,41 +156,50 @@ $todayD  = (int)date('j');
     </div>
 
     <!-- Time picker -->
-    <div>
-      <p class="text-sm font-bold text-slate-700 mb-2">Hora y disponibilidad</p>
-      <div class="flex gap-2 items-center">
-        <select id="hourSel" onchange="buildTime()"
-          class="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 outline-none">
-          <!-- populated by JS -->
-        </select>
-        <div class="flex rounded-xl border border-slate-200 overflow-hidden bg-white">
-          <?php foreach (['AM','PM'] as $p): ?>
-            <button type="button" id="btn<?= $p ?>" onclick="setAmpm('<?= $p ?>')"
-              class="ampm-btn px-5 py-3 text-sm font-bold transition">
-              <?= $p ?>
-            </button>
-          <?php endforeach; ?>
+    <div id="timeSection" class="fluid-section hidden">
+      <p class="text-sm font-bold text-slate-700 mb-2">Disponibilidad de horas</p>
+
+      <select id="periodSel" onchange="onPeriodChange()"
+        class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 outline-none">
+        <option value="">Selecciona un horario</option>
+        <option value="morning">Mañana — 8:00 AM a 12:00 PM</option>
+        <option value="afternoon">Tarde — 1:00 PM a 5:00 PM</option>
+        <option value="evening">Por las noches</option>
+        <option value="custom">Otros (escoge la hora)</option>
+      </select>
+
+      <div id="customTimeWrap" class="hidden mt-3 fluid-pop-target">
+        <div class="flex gap-2 items-center">
+          <select id="hourSel" onchange="buildTime()"
+            class="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 outline-none">
+          </select>
+          <div class="flex rounded-xl border border-slate-200 overflow-hidden bg-white">
+            <?php foreach (['AM','PM'] as $p): ?>
+              <button type="button" id="btn<?= $p ?>" onclick="setAmpm('<?= $p ?>')"
+                class="ampm-btn px-5 py-3 text-sm font-bold transition">
+                <?= $p ?>
+              </button>
+            <?php endforeach; ?>
+          </div>
         </div>
       </div>
-      <p id="timeDisplay" class="text-xs text-slate-400 mt-1.5 text-right"></p>
+
+      <p id="timeDisplay" class="text-xs text-slate-400 mt-1.5 text-right hidden"></p>
     </div>
 
     <!-- Location preference -->
-      <div>
+      <div id="locSection" class="fluid-section hidden">
       <p class="text-sm font-bold text-slate-700 mb-2">¿Dónde se realizará el servicio?</p>
-      <div class="flex gap-2">
+      <div class="flex gap-3">
       <?php foreach ([            ['notary','building-2','En la notaría',0],['home','home','A mi domicilio',1]] as [$key,$icon,$lbl,$val]): ?>
-          <label class="place-opt flex-1 flex flex-col items-center gap-1.5 bg-white rounded-2xl py-3 px-2 border-[1.5px] border-slate-200 cursor-pointer transition text-center" data-val="<?= $val ?>" data-key="<?= $key ?>">
+          <label class="place-opt flex-1 flex flex-col items-center justify-center gap-3 aspect-[5/4] bg-white rounded-xl py-4 px-3 border-[1.5px] border-slate-200 cursor-pointer transition text-center" data-val="<?= $val ?>" data-key="<?= $key ?>">
             <input type="radio" name="_place" value="<?= $key ?>" class="sr-only" <?= $key === 'notary' ? 'checked' : '' ?> />
-            <i data-lucide="<?= $icon ?>" class="place-icon w-6 h-6 text-slate-500 transition"></i>
+            <i data-lucide="<?= $icon ?>" class="place-icon w-12 h-12 text-slate-500 transition"></i>
             <span class="place-label text-xs font-semibold text-slate-700 transition"><?= $lbl ?></span>
           </label>
         <?php endforeach; ?>
       </div>
     </div>
-
-    <!-- Summary chip -->
-    <div id="summaryChip" class="hidden bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-800 font-semibold flex items-center justify-around"></div>
 
     <button type="submit" id="continueBtn"
       class="w-full mt-auto bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold
@@ -155,6 +210,34 @@ $todayD  = (int)date('j');
 
   <script>
     const todayISO   = new Date().toISOString().slice(0, 10);
+
+    // ── Fluid show/hide helpers ───────────────────────────────────────────────
+    function revealSection(el, scroll = true) {
+      if (!el) return;
+      if (el.classList.contains('fluid-shown')) {
+        if (scroll) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+        return;
+      }
+      el.classList.remove('hidden');
+      void el.offsetHeight;
+      el.classList.add('fluid-shown');
+      const popChildren = el.querySelectorAll('.fluid-pop-target');
+      popChildren.forEach(c => {
+        c.classList.remove('fluid-pop');
+        void c.offsetWidth;
+        c.classList.add('fluid-pop');
+      });
+      if (scroll) {
+        setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120);
+      }
+    }
+    function hideSection(el) {
+      if (!el) return;
+      el.classList.remove('fluid-shown');
+      setTimeout(() => {
+        if (!el.classList.contains('fluid-shown')) el.classList.add('hidden');
+      }, 420);
+    }
     const MONTHS     = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const nowH       = new Date().getHours();   // 0-23, current hour
     const minH24Today = nowH + 1;               // first bookable hour today
@@ -175,7 +258,7 @@ $todayD  = (int)date('j');
     const initT    = from24(Math.min(minH24Today, 23));
     let selectedAmpm = initT.ampm;  // default to current+1 period
 
-    let selectedDate = todayISO;
+    let selectedDate = '';
     let calYear  = <?= $todayY ?>;
     let calMonth = <?= $todayM ?>;
 
@@ -211,14 +294,22 @@ $todayD  = (int)date('j');
 
         const opt = r.value;
         document.getElementById('calendarWrap').classList.toggle('hidden', opt !== 'custom');
+        const timeSec = document.getElementById('timeSection');
+        const locSec  = document.getElementById('locSection');
         if (opt !== 'custom') {
           selectedDate = getDateForOpt(opt);
           refreshTimePicker(selectedDate);
           updateSummary();
+          revealSection(timeSec);
         } else {
           selectedDate = '';
           refreshTimePicker('');
           updateSummary();
+          hideSection(timeSec);
+          hideSection(locSec);
+          setTimeout(() => {
+            document.getElementById('calendarWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 200);
         }
       });
       if (r.checked) r.dispatchEvent(new Event('change'));
@@ -251,6 +342,7 @@ $todayD  = (int)date('j');
       renderCal();
       refreshTimePicker(selectedDate);
       updateSummary();
+      revealSection(document.getElementById('timeSection'));
     }
 
     document.getElementById('calPrev').onclick = () => {
@@ -307,11 +399,80 @@ $todayD  = (int)date('j');
     }
 
     function buildTime() {
+      const customWrap = document.getElementById('customTimeWrap');
+      if (customWrap.classList.contains('hidden') &&
+          document.getElementById('periodSel').value === 'custom') {
+        customWrap.classList.remove('hidden');
+        customWrap.classList.remove('fluid-pop');
+        void customWrap.offsetWidth;
+        customWrap.classList.add('fluid-pop');
+      }
       const h   = parseInt(document.getElementById('hourSel').value, 10);
       const h24 = to24(h, selectedAmpm);
       hidTime.value = String(h24).padStart(2,'0') + ':00';
       document.getElementById('timeDisplay').textContent =
         'Seleccionado: ' + String(h).padStart(2,'0') + ':00 ' + selectedAmpm;
+      updateSummary();
+      if (selectedDate) {
+        revealSection(document.getElementById('locSection'));
+      }
+    }
+
+    function onPeriodChange() {
+      const period = document.getElementById('periodSel').value;
+      const customWrap = document.getElementById('customTimeWrap');
+      const display = document.getElementById('timeDisplay');
+      const loc = document.getElementById('locSection');
+
+      if (!period) {
+        hidTime.value = '';
+        hideSection(customWrap);
+        display.textContent = '';
+        hideSection(loc);
+        updateSummary();
+        return;
+      }
+
+      if (period === 'custom') {
+        customWrap.classList.remove('hidden');
+        customWrap.classList.remove('fluid-pop');
+        void customWrap.offsetWidth;
+        customWrap.classList.add('fluid-pop');
+        refreshTimePicker(selectedDate);
+        if (selectedDate) {
+          revealSection(loc);
+        }
+        setTimeout(() => {
+          customWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 200);
+        return;
+      }
+
+      // Predefined periods → default representative time
+      const presets = {
+        morning:   { h: 9,  ampm: 'AM', label: 'Mañana (8:00 AM – 12:00 PM)' },
+        afternoon: { h: 2,  ampm: 'PM', label: 'Tarde (1:00 PM – 5:00 PM)' },
+        evening:   { h: 7,  ampm: 'PM', label: 'Por las noches' },
+      };
+      const t = presets[period];
+      selectedAmpm = t.ampm;
+      const h24 = to24(t.h, t.ampm);
+
+      // For "today", ensure default isn't before the earliest bookable hour
+      const isToday  = selectedDate === todayISO;
+      const minH24   = isToday ? minH24Today : 0;
+      let finalH = h24;
+      if (isToday && h24 < minH24) finalH = Math.min(minH24, 23);
+
+      hidTime.value = String(finalH).padStart(2,'0') + ':00';
+      const final12 = from24(finalH);
+      display.textContent = 'Seleccionado: ' + t.label + ' — hora tentativa ' +
+        String(final12.h).padStart(2,'0') + ':00 ' + final12.ampm;
+      hideSection(customWrap);
+
+      if (selectedDate) {
+        revealSection(loc);
+      }
       updateSummary();
     }
 
@@ -354,23 +515,6 @@ $todayD  = (int)date('j');
     // ── Summary & validation ──────────────────────────────────────────────────
     function updateSummary() {
       hidDate.value = selectedDate;
-      if (selectedDate && hidTime.value) {
-        const h = document.getElementById('hourSel').value;
-        summary.innerHTML = `
-          <span class="flex items-center gap-1.5">
-            <i data-lucide="calendar" class="inline w-4 h-4 -mt-0.5"></i>
-            ${selectedDate}
-          </span>
-          <span class="flex items-center gap-1.5">
-            <i data-lucide="clock" class="inline w-4 h-4 -mt-0.5"></i>
-            ${String(h).padStart(2,'0')}:00 ${selectedAmpm}
-          </span>
-        `;
-        if (window.lucide) lucide.createIcons();
-        summary.classList.remove('hidden');
-      } else {
-        summary.classList.add('hidden');
-      }
     }
 
     updateSummary();
