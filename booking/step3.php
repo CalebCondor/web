@@ -279,13 +279,14 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
       <div class="flex gap-3 px-5 pb-5">
         <button type="button" onclick="closeModal()"
           class="flex-1 border-[1.5px] border-slate-300 text-slate-600 font-semibold rounded-2xl py-3.5 hover:bg-slate-50 active:scale-95 transition text-sm">
-          No
+          Cerrar
         </button>
         <form method="POST" class="flex-1">
           <input type="hidden" name="notary_json" id="modalNotaryField" value="" />
-          <button type="submit" onclick="document.getElementById('modalNotaryField').value=document.getElementById('hidNotary').value"
-            class="w-full bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold rounded-2xl py-3.5 shadow-lg shadow-blue-700/30 transition text-sm">
-            Sí, continuar →
+          <button type="submit" id="confirmBtn" disabled
+            onclick="document.getElementById('modalNotaryField').value=document.getElementById('hidNotary').value"
+            class="w-full bg-blue-300 cursor-not-allowed text-white font-extrabold rounded-2xl py-3.5 transition text-sm">
+            Selecciona un notario
           </button>
         </form>
       </div>
@@ -296,6 +297,18 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
     const hidNotary   = document.getElementById('hidNotary');
     const HOME_FEE    = <?= $HOME_FEE ?>;
     const domicilio   = <?= $domicilio ?>;
+
+    // Show booking summary modal automatically on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('priceModal');
+      // Hide price rows (no notary selected yet)
+      document.getElementById('mBase').textContent  = 'Selecciona un notario abajo';
+      document.getElementById('mBase').classList.add('text-slate-400');
+      document.getElementById('mTotal').textContent = '—';
+      document.getElementById('mHomeFee').classList.add('hidden');
+      modal.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    });
 
     document.querySelectorAll('.notary-card input').forEach(radio => {
       radio.addEventListener('change', () => {
@@ -321,18 +334,35 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
         const total = domicilio ? fee + HOME_FEE : fee;
 
         // Populate modal
-        document.getElementById('mBase').textContent  = cur + ' ' + fee.toFixed(2);
+        const baseEl = document.getElementById('mBase');
+        baseEl.textContent  = cur + ' ' + fee.toFixed(2);
+        baseEl.classList.remove('text-slate-400');
         document.getElementById('mTotal').textContent = cur + ' ' + total.toFixed(2);
         document.getElementById('mHomeFee').classList.toggle('hidden', !domicilio);
         document.getElementById('mHomeFeeVal').textContent = cur + ' ' + HOME_FEE.toFixed(2);
 
         hidNotary.value = card.dataset.json;
+        document.getElementById('modalNotaryField').value = card.dataset.json;
+
+        // Enable confirm button
+        const confirmBtn = document.getElementById('confirmBtn');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Sí, continuar →';
+        confirmBtn.className = 'w-full bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold rounded-2xl py-3.5 shadow-lg shadow-blue-700/30 transition text-sm';
+
         document.getElementById('priceModal').classList.remove('hidden');
       });
     });
 
     function closeModal() {
       document.getElementById('priceModal').classList.add('hidden');
+      // If no notary was selected, also reset the price placeholder
+      if (!hidNotary.value) {
+        const base = document.getElementById('mBase');
+        base.textContent = 'Selecciona un notario abajo';
+        base.classList.add('text-slate-400');
+        document.getElementById('mTotal').textContent = '—';
+      }
       // Deselect the notary card
       document.querySelectorAll('.notary-card').forEach(c => {
         c.classList.remove('border-blue-600','bg-blue-50');
@@ -342,7 +372,6 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
         c.querySelector('.n-dot').classList.add('hidden');
       });
       document.querySelectorAll('.notary-card input').forEach(r => r.checked = false);
-      hidNotary.value = '';
     }
   </script>
 
