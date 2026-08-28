@@ -282,6 +282,142 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <?php include '../_nav.php'; ?>
 </div>
 
+<!-- Overlay del sello de "PAGO REALIZADO" -->
+<div id="stampOverlay" class="hidden fixed inset-0 z-[100] bg-white/95 backdrop-blur-md flex flex-col items-center justify-center overflow-hidden">
+  <div class="stamp-wrap">
+    <div class="stamp" id="theStamp">
+      <span class="stamp-top">★ PAGO ★</span>
+      <span class="stamp-mid">REALIZADO</span>
+      <span class="stamp-bot">✓ CONFIRMADO</span>
+    </div>
+  </div>
+  <p id="stampLabel" class="mt-8 text-slate-500 text-sm font-semibold tracking-wider uppercase">Procesando tu pago…</p>
+</div>
+
+<style>
+  /* ── Sello animado (lento y dramático) ──────────────────────── */
+  .stamp-wrap {
+    perspective: 900px;
+    position: relative;
+  }
+
+  .stamp {
+    width: 230px; height: 230px;
+    border: 7px solid #dc2626;
+    border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #dc2626;
+    font-family: 'Impact', 'Arial Black', sans-serif;
+    text-align: center;
+    position: relative;
+    opacity: 0;
+    transform: scale(4) rotate(-35deg) translateY(-300px);
+    background: rgba(254, 226, 226, 0.15);
+    box-shadow:
+      inset 0 0 0 5px rgba(255,255,255,0.7),
+      inset 0 0 0 11px #dc2626,
+      inset 0 0 0 17px rgba(255,255,255,0.7),
+      0 0 0 3px rgba(220,38,38,0.15);
+    /* 3 fases: anticipación (rise) → slam (down) → settle (bounces) */
+    animation:
+      stampRise   0.45s cubic-bezier(.4, 0, .6, 1) forwards,
+      stampSlam   0.55s cubic-bezier(.55, 1.7, .5, 1) 0.45s forwards,
+      stampSettle 0.85s cubic-bezier(.3, .8, .4, 1)    1.0s  forwards;
+  }
+
+  .stamp::before {
+    content: '';
+    position: absolute; inset: -16px;
+    border: 3px dashed #dc2626;
+    border-radius: 50%;
+    opacity: 0.55;
+  }
+  .stamp::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    background-image:
+      radial-gradient(circle at 28% 38%, rgba(220,38,38,0.22) 0, transparent 9%),
+      radial-gradient(circle at 72% 60%, rgba(220,38,38,0.16) 0, transparent 11%),
+      radial-gradient(circle at 50% 28%, rgba(220,38,38,0.18) 0, transparent 7%),
+      radial-gradient(circle at 60% 75%, rgba(220,38,38,0.14) 0, transparent 8%);
+    mix-blend-mode: multiply;
+  }
+  .stamp-top, .stamp-mid, .stamp-bot {
+    position: relative; z-index: 1;
+  }
+  .stamp-top { font-size: 13px; letter-spacing: 3px; opacity: 0.85; margin-bottom: 2px; }
+  .stamp-mid { font-size: 28px; letter-spacing: 2.5px; line-height: 1; margin: 5px 0; }
+  .stamp-bot { font-size: 11px; letter-spacing: 2.5px; opacity: 0.85; margin-top: 4px; }
+
+  /* ── Partículas de tinta que salen disparadas al impacto ────── */
+  .ink-splat {
+    position: absolute;
+    background: #dc2626;
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .ink-splat.go {
+    animation: splatFly 0.9s cubic-bezier(.2, .7, .4, 1) forwards;
+  }
+
+  @keyframes stampRise {
+    0%   { opacity: 0; transform: scale(0.4) rotate(15deg)  translateY(120px); }
+    40%  { opacity: 1; }
+    100% { opacity: 1; transform: scale(4.0) rotate(-35deg) translateY(-300px); }
+  }
+  @keyframes stampSlam {
+    0%   { opacity: 1; transform: scale(4.0) rotate(-35deg) translateY(-300px); }
+    60%  { opacity: 1; transform: scale(0.86) rotate(-5deg) translateY(0); }
+    100% { opacity: 1; transform: scale(1.10) rotate(-6deg) translateY(0); }
+  }
+  @keyframes stampSettle {
+    0%   { transform: scale(1.10) rotate(-6deg) translateY(0); }
+    25%  { transform: scale(0.94) rotate(-7deg) translateY(0); }
+    50%  { transform: scale(1.05) rotate(-6deg) translateY(0); }
+    70%  { transform: scale(0.97) rotate(-6deg) translateY(0); }
+    85%  { transform: scale(1.02) rotate(-6deg) translateY(0); }
+    100% { transform: scale(1)    rotate(-6deg) translateY(0); }
+  }
+
+  @keyframes splatFly {
+    0%   { opacity: 0; transform: translate(0,0) scale(0.3); }
+    20%  { opacity: 0.95; }
+    100% { opacity: 0;   transform: var(--fly-end) scale(0.6); }
+  }
+
+  /* Camera shake de toda la pantalla al impacto */
+  #stampOverlay.shake {
+    animation: cameraShake 0.45s ease-out;
+  }
+  @keyframes cameraShake {
+    0%   { transform: translate(0,0); }
+    10%  { transform: translate(-8px, 6px); }
+    20%  { transform: translate(7px, -5px); }
+    30%  { transform: translate(-6px, 4px); }
+    40%  { transform: translate(5px, -3px); }
+    50%  { transform: translate(-4px, 3px); }
+    60%  { transform: translate(3px, -2px); }
+    70%  { transform: translate(-2px, 1px); }
+    100% { transform: translate(0,0); }
+  }
+
+  #stampLabel {
+    opacity: 0;
+    animation: fadeLabel 0.5s ease-out 0.6s forwards;
+  }
+  @keyframes fadeLabel {
+    to { opacity: 1; }
+  }
+
+  /* Check ✓ dentro del sello: aparece después del impacto */
+  .stamp-mid::after {
+    content: '';
+    display: block;
+  }
+</style>
+
 <script>
   (function () {
     const cardNumber = document.getElementById('cardNumber');
@@ -291,6 +427,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     const previewNum = document.getElementById('cardPreviewNumber');
     const previewNm  = document.getElementById('cardPreviewName');
     const previewEx  = document.getElementById('cardPreviewExp');
+    const form       = document.getElementById('paymentForm');
+    const overlay    = document.getElementById('stampOverlay');
+    const wrap       = overlay.querySelector('.stamp-wrap');
 
     function formatNum(raw) {
       const v = raw.replace(/\D/g, '').slice(0, 16);
@@ -313,6 +452,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     });
     cardCvv.addEventListener('input', e => {
       e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    });
+
+    // ── Spawn ink splats cuando el sello "impacta" ─────────────
+    function spawnSplats(count) {
+      const rect = wrap.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      for (let i = 0; i < count; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'ink-splat';
+        const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.4 - 0.2);
+        const dist  = 110 + Math.random() * 70;
+        const dx = Math.cos(angle) * dist;
+        const dy = Math.sin(angle) * dist;
+        const size = 6 + Math.random() * 10;
+        dot.style.width = dot.style.height = size + 'px';
+        dot.style.left = (cx - size / 2) + 'px';
+        dot.style.top  = (cy - size / 2) + 'px';
+        dot.style.setProperty('--fly-end', `translate(${dx}px, ${dy}px)`);
+        document.body.appendChild(dot);
+        // trigger animation next frame
+        requestAnimationFrame(() => requestAnimationFrame(() => dot.classList.add('go')));
+        setTimeout(() => dot.remove(), 1100);
+      }
+    }
+
+    // ── Interceptar submit para mostrar el sello antes de enviar ──
+    form.addEventListener('submit', function (e) {
+      if (form.dataset.stamping === '1') return;
+      e.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      form.dataset.stamping = '1';
+      document.body.style.overflow = 'hidden';
+      overlay.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+
+      // 0.45s rise + 0.55s slam → impacto en ~1.0s
+      // Camera shake + ink splats al momento del impacto
+      setTimeout(() => {
+        overlay.classList.add('shake');
+        spawnSplats(14);
+      }, 1000);
+
+      // Cambiar label mientras se procesa
+      setTimeout(() => {
+        const lbl = document.getElementById('stampLabel');
+        if (lbl) {
+          lbl.textContent = 'Confirmando reserva…';
+          lbl.style.animation = 'none';
+          lbl.offsetHeight;
+          lbl.style.animation = 'fadeLabel 0.4s ease-out forwards';
+        }
+      }, 1900);
+
+      // Enviar el formulario (PHP redirige a step5.php)
+      setTimeout(() => form.submit(), 3200);
     });
   })();
 </script>
