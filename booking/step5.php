@@ -1,6 +1,30 @@
 <?php
 require_once '../config.php';
 session_init();
+
+// TEST MODE: precarga datos de demo si ?test=1 (para ver step5 sin pasar por todo el flujo)
+if (isset($_GET['test']) && $_GET['test'] === '1') {
+    $_SESSION['booking'] = [
+        'service_name' => 'Servicio Demo',
+        'service_id'   => 1,
+        'date'         => date('Y-m-d', strtotime('+3 days')),
+        'time'         => '10:00',
+        'domicilio'    => 0,
+        'fee_base'     => 150,
+        'notary'       => [
+            'nombre'          => 'Notaría Demo',
+            'id_abogado'      => 1,
+            'moneda'          => 'USD',
+            'tarifa_consulta' => 150,
+            'horario'         => 'Lun-Vie 9:00-17:00',
+            'direccion'       => 'Calle Demo 123',
+        ],
+        'pago' => ['id_transaccion' => 'DEMO123', 'numero_factura' => 'NTZ00001'],
+    ];
+    $_SESSION['user'] = ['id_cliente' => 1, 'nombre' => 'Cliente Demo'];
+    $_SESSION['client_token'] = 'demo';
+}
+
 $b = $_SESSION['booking'] ?? [];
 if (empty($b['notary'])) { header('Location: step3.php'); exit; }
 
@@ -28,9 +52,8 @@ $direccion   = $notary['direccion']          ?? '';
 $domicilio   = (int)($b['domicilio']        ?? 0);
 $modLabel    = $domicilio ? 'Visita a domicilio' : 'En la notaría';
 
-// Flag de pago recién realizado (mostrar animación una sola vez)
-$showSuccessAnim = !empty($_SESSION['booking']['payment_just_made']);
-unset($_SESSION['booking']['payment_just_made']);
+// Animación de éxito deshabilitada (el video no funciona).
+$showSuccessAnim = false;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -173,39 +196,96 @@ unset($_SESSION['booking']['payment_just_made']);
 
   <!-- Sticky bottom button -->
   <div class="sticky bottom-0 px-4 py-4 bg-white border-t border-slate-200">
-    <a href="step6.php"
+    <button type="button" id="openNotifyModal" onclick="showNotifyModal(); return false;"
       class="w-full bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold text-center
              rounded-2xl py-4 shadow-lg shadow-blue-700/30 transition block">
       Ver Ruta →
-    </a>
+    </button>
   </div>
 
   <?php include '../_nav.php'; ?>
 </div>
 
-<?php if ($showSuccessAnim): ?>
+<!-- Modal: estilo slide-up como step3 (priceModal) -->
+<div id="notifyModal" class="hidden fixed inset-0 z-[60] flex items-end justify-center bg-black/50 px-4 pb-6"
+     onclick="if(event.target===this) hideNotifyModal()">
+  <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+
+    <!-- Header azul (igual al priceModal) -->
+    <div class="bg-blue-700 px-5 py-3.5 flex items-center gap-2">
+      <i data-lucide="bell-ring" class="w-5 h-5 text-white"></i>
+      <p class="text-white font-extrabold text-base flex-1">Recibir notificaciones</p>
+      <button type="button" id="closeNotifyModal" onclick="hideNotifyModal()" class="text-white/80 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="px-5 py-5 flex flex-col gap-4">
+      <!-- Icono central + pregunta -->
+      <div class="flex flex-col items-center text-center gap-3">
+        <div class="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
+          <i data-lucide="bell-ring" class="w-8 h-8 text-blue-700"></i>
+        </div>
+        <div>
+          <p class="text-base font-bold text-slate-900 mb-1">¿Deseas recibir notificaciones antes de tu cita?</p>
+          <p class="text-xs text-slate-500 leading-relaxed">Te avisaremos con anticipación para que no olvides tu reserva.</p>
+        </div>
+      </div>
+
+      <!-- Divisor punteado -->
+      <div class="border-t border-dashed border-slate-200"></div>
+
+      <!-- Opciones Sí / No -->
+      <div class="flex gap-3">
+        <button type="button" id="notifyNo" onclick="goStep6('0')"
+          class="flex-1 border-[1.5px] border-slate-300 text-slate-600 font-semibold rounded-2xl py-3.5 hover:bg-slate-50 active:scale-95 transition text-sm inline-flex items-center justify-center gap-1.5">
+          <i data-lucide="bell-off" class="w-4 h-4"></i>
+          No, gracias
+        </button>
+        <button type="button" id="notifyYes" onclick="goStep6('1')"
+          class="flex-1 bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold rounded-2xl py-3.5 shadow-lg shadow-blue-700/30 transition text-sm inline-flex items-center justify-center gap-1.5">
+          <i data-lucide="bell" class="w-4 h-4"></i>
+          Sí, notificarme
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   (function () {
-    var overlay = document.getElementById('successOverlay');
-    var video   = document.getElementById('successVideo');
-    if (!overlay) return;
+    var modal      = document.getElementById('notifyModal');
+    var openBtn    = document.getElementById('openNotifyModal');
 
-    function dismiss() {
-      overlay.style.opacity = '0';
-      setTimeout(function () { overlay.remove(); }, 700);
+    function showModal() {
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      if (window.lucide) lucide.createIcons();
+    }
+    function hideModal() {
+      if (!modal) return;
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    function goStep6(answer) {
+      try {
+        var fd = new FormData();
+        fd.append('notify', answer);
+        if (navigator.sendBeacon) navigator.sendBeacon('notify_save.php', fd);
+      } catch (e) {}
+      window.location.href = 'step6.php';
     }
 
-    if (video) {
-      video.addEventListener('ended', dismiss);
-      // Por si el navegador no dispara 'ended' (.mov en algunos navegadores)
-      video.addEventListener('error', function () { setTimeout(dismiss, 1200); });
-    }
+    // Globales para los onclick inline
+    window.showNotifyModal = showModal;
+    window.hideNotifyModal = hideModal;
+    window.goStep6         = goStep6;
 
-    // Fallback: siempre desaparecer después de 4.5s
-    setTimeout(dismiss, 4500);
+    if (openBtn) openBtn.addEventListener('click', showModal);
   })();
 </script>
-<?php endif; ?>
 
 </body>
 </html>
