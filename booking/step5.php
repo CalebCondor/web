@@ -27,6 +27,10 @@ $horario     = $notary['horario']            ?? '';
 $direccion   = $notary['direccion']          ?? '';
 $domicilio   = (int)($b['domicilio']        ?? 0);
 $modLabel    = $domicilio ? 'Visita a domicilio' : 'En la notaría';
+
+// Flag de pago recién realizado (mostrar animación una sola vez)
+$showSuccessAnim = !empty($_SESSION['booking']['payment_just_made']);
+unset($_SESSION['booking']['payment_just_made']);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -35,6 +39,21 @@ $modLabel    = $domicilio ? 'Visita a domicilio' : 'En la notaría';
   <?php include '../_head.php'; ?>
 </head>
 <body class="bg-white md:bg-slate-200 min-h-screen flex justify-center">
+
+<?php if ($showSuccessAnim): ?>
+<!-- Success animation overlay -->
+<div id="successOverlay" class="fixed inset-0 z-[100] bg-white/95 backdrop-blur-sm flex items-center justify-center transition-opacity duration-700">
+  <div class="text-center flex flex-col items-center px-6">
+    <video id="successVideo" autoplay muted playsinline class="w-64 h-64 md:w-80 md:h-80 object-contain">
+      <source src="../assets/pago-realizado.mp4" type="video/mp4">
+      <source src="../assets/pago-realizado.mov" type="video/quicktime">
+    </video>
+    <p class="text-2xl font-extrabold text-slate-900 mt-2">¡Pago realizado!</p>
+    <p class="text-sm text-slate-500 mt-1">Procesando tu reserva…</p>
+  </div>
+</div>
+<?php endif; ?>
+
 <div class="w-full md:max-w-sm min-h-screen bg-slate-50 flex flex-col md:shadow-2xl relative">
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
@@ -162,5 +181,30 @@ $modLabel    = $domicilio ? 'Visita a domicilio' : 'En la notaría';
 
   <?php include '../_nav.php'; ?>
 </div>
+
+<?php if ($showSuccessAnim): ?>
+<script>
+  (function () {
+    var overlay = document.getElementById('successOverlay');
+    var video   = document.getElementById('successVideo');
+    if (!overlay) return;
+
+    function dismiss() {
+      overlay.style.opacity = '0';
+      setTimeout(function () { overlay.remove(); }, 700);
+    }
+
+    if (video) {
+      video.addEventListener('ended', dismiss);
+      // Por si el navegador no dispara 'ended' (.mov en algunos navegadores)
+      video.addEventListener('error', function () { setTimeout(dismiss, 1200); });
+    }
+
+    // Fallback: siempre desaparecer después de 4.5s
+    setTimeout(dismiss, 4500);
+  })();
+</script>
+<?php endif; ?>
+
 </body>
 </html>
