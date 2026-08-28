@@ -44,11 +44,12 @@ unset($_SESSION['booking']['payment_just_made']);
 <!-- Success animation overlay -->
 <div id="successOverlay" class="fixed inset-0 z-[100] bg-white/95 backdrop-blur-sm flex items-center justify-center transition-opacity duration-700">
   <div class="text-center flex flex-col items-center px-6">
-    <video id="successVideo" autoplay muted playsinline class="w-64 h-64 md:w-80 md:h-80 object-contain">
-      <source src="../assets/pago-realizado.mp4" type="video/mp4">
-      <source src="../assets/pago-realizado.mov" type="video/quicktime">
+    <video id="successVideo" autoplay muted playsinline preload="auto"
+      poster="../assets/pago-realizado.jpg"
+      src="../assets/pago-realizado.mp4"
+      class="w-72 h-72 md:w-96 md:h-96 object-contain rounded-2xl bg-transparent">
     </video>
-    <p class="text-2xl font-extrabold text-slate-900 mt-2">¡Pago realizado!</p>
+    <p class="text-2xl font-extrabold text-slate-900 mt-3">¡Pago realizado!</p>
     <p class="text-sm text-slate-500 mt-1">Procesando tu reserva…</p>
   </div>
 </div>
@@ -57,7 +58,7 @@ unset($_SESSION['booking']['payment_just_made']);
 <div class="w-full md:max-w-sm min-h-screen bg-slate-50 flex flex-col md:shadow-2xl relative">
 
   <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
-    <img src="../assets/LogoS2.png" alt="Notarize" class="h-11 w-auto brightness-0 invert">
+    <img src="../assets/LogoS2.png" alt="Notarize" class="h-11 w-auto">
     <span class="text-white/50 text-xs ml-auto">5/6</span>
   </div>
 
