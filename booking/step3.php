@@ -86,7 +86,7 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
 <body class="bg-white md:bg-slate-200 min-h-screen flex justify-center">
 <div class="w-full md:max-w-sm min-h-screen bg-slate-50 flex flex-col md:shadow-2xl relative overflow-hidden">
 
-  <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
+  <div class="bg-[#1e3a8a] px-5 py-4 flex items-center gap-3">
     <img src="../assets/LogoS2.png" alt="Notarize" class="h-11 w-auto">
   </div>
 
@@ -218,7 +218,7 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
         <button type="button" id="continueBtn" disabled
           onclick="openSummary()"
           class="w-full mt-2 bg-blue-300 cursor-not-allowed text-white font-extrabold rounded-2xl py-4 transition text-base">
-          Selecciona un notario
+          Continuar
         </button>
       <?php endif; ?>
   </div>
@@ -288,7 +288,7 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
         <!-- Price details -->
         <div class="flex flex-col gap-2 text-sm">
           <div class="flex justify-between">
-            <span class="text-slate-500">Tarifa del notario</span>
+            <span class="text-slate-500">Costo del notario</span>
             <span id="mBase" class="font-semibold text-slate-900">—</span>
           </div>
           <div id="mHomeFee" class="hidden flex justify-between items-center">
@@ -314,7 +314,7 @@ $locationLabel = $domicilio ? 'A tu domicilio' : 'En la notaría';
           <button type="submit" id="confirmBtn" disabled
             onclick="document.getElementById('modalNotaryField').value=document.getElementById('hidNotary').value"
             class="w-full bg-blue-300 text-white font-extrabold rounded-2xl py-3.5 transition text-sm cursor-not-allowed disabled:cursor-not-allowed">
-            Selecciona un notario
+            Continuar
           </button>
         </form>
       </div>
