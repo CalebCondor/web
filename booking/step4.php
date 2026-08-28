@@ -4,163 +4,317 @@ session_init();
 $b = $_SESSION['booking'] ?? [];
 if (empty($b['notary'])) { header('Location: step3.php'); exit; }
 
-$notary   = $b['notary'];
-$pago     = $b['pago']           ?? [];
-$service  = $b['service_name']   ?? '';
-$date     = $b['date']           ?? '';
-$time     = $b['time']           ?? '';
-$currency = $notary['moneda']    ?? 'USD';
+$notary    = $b['notary'];
+$currency  = $notary['moneda'] ?? 'USD';
 $domicilio = (int)($b['domicilio'] ?? 0);
 $homeFee   = $domicilio ? 80 : 0;
+// Use stored base fee; fall back to subtracting homeFee for legacy sessions that had it baked in
 $fee       = isset($b['fee_base'])
     ? (float)$b['fee_base']
     : max(0, (float)($notary['tarifa_consulta'] ?? 0) - $homeFee);
 $total     = $fee + $homeFee;
+$service   = $b['service_name'] ?? '';
+$date      = $b['date']         ?? '';
+$time      = $b['time']         ?? '';
+$modalidad = $domicilio ? 'Visita a domicilio' : 'En la notaría';
 
-// Use real payment data or generate demo values
-$txId      = $pago['id_transaccion']  ?? $pago['transaction_id'] ?? 'LOCAL_' . time() . rand(10, 99);
-$invoice   = $pago['numero_factura']  ?? $pago['invoice']        ?? 'NTZ' . str_pad((string)rand(1, 9999), 5, '0', STR_PAD_LEFT);
-$paidAtRaw = $pago['fecha_pago']      ?? $pago['created_at']     ?? date('Y-m-d H:i:s');
-$paidAt    = strtotime($paidAtRaw) ? date('M j, Y g:i A', strtotime($paidAtRaw)) : date('M j, Y g:i A');
-$notaryName  = $notary['nombre']             ?? 'Notario seleccionado';
-$horario     = $notary['horario']            ?? '';
-$direccion   = $notary['direccion']          ?? '';
-$domicilio   = (int)($b['domicilio']        ?? 0);
-$modLabel    = $domicilio ? 'Visita a domicilio' : 'En la notaría';
+$error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $token    = $_SESSION['client_token'] ?? '';
+    // Try multiple possible field names for IDs
+    $userId   = $_SESSION['user']['id_cliente'] ?? $_SESSION['user']['id'] ?? null;
+    $notaryId = $notary['id_abogado'] ?? $notary['id'] ?? $notary['abogado_id'] ?? null;
+
+    // Card details from form
+    $cardNumber = preg_replace('/\s+/', '', $_POST['card_number'] ?? '');
+    $cardName   = trim($_POST['card_name'] ?? '');
+    $cardExpRaw = trim($_POST['card_exp']   ?? '');
+    $cardCvv    = trim($_POST['card_cvv']   ?? '');
+    $mes_exp    = '12';
+    $anio_exp   = '2027';
+    if (preg_match('/^(\d{2})\s*\/\s*(\d{2})$/', $cardExpRaw, $m)) {
+        $mes_exp  = $m[1];
+        $anio_exp = $m[2];
+    }
+    // Demo fallback: si el usuario usa la tarjeta de prueba 4242...
+    if ($cardNumber === '') {
+        $cardNumber = '4242424242424242';
+        $cardName   = $cardName ?: ($_SESSION['user']['nombre'] ?? 'CLIENTE DEMO');
+        $cardCvv    = $cardCvv ?: '123';
+    }
+
+    if ($token && $userId && $notaryId) {
+        // Step 1: Create the pago record (pendiente)
+        $ch = curl_init(API_BASE . '/pagos');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST  => 'POST',
+            CURLOPT_HTTPHEADER     => ['Content-Type: application/json', "Authorization: Bearer $token"],
+            CURLOPT_POSTFIELDS     => json_encode([
+                'id_cliente'  => (int)$userId,
+                'id_abogado'  => (int)$notaryId,
+                'monto'       => $fee,
+                'fecha'       => $date,
+                'estado_pago' => 'pendiente',
+            ]),
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+        $rawCreate = curl_exec($ch);
+        $httpCreate = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        $resCreate  = json_decode($rawCreate, true) ?? [];
+
+        if (!($resCreate['success'] ?? false)) {
+            // Pago creation failed — store message for step5
+            $_SESSION['booking']['pago'] = [
+                '_create_err' => ($resCreate['message'] ?? '') . ' [HTTP ' . $httpCreate . '] ' . substr($rawCreate, 0, 300),
+            ];
+        } else {
+            $idPago = $resCreate['data']['id_pago'] ?? null;
+
+            // Step 2: POST /pagos/{id}/checkout with the card the user entered
+            if ($idPago) {
+                $ch2 = curl_init(API_BASE . "/pagos/$idPago/checkout");
+                curl_setopt_array($ch2, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_POST           => true,
+                    CURLOPT_HTTPHEADER     => ['Content-Type: application/json', "Authorization: Bearer $token"],
+                    CURLOPT_POSTFIELDS     => json_encode([
+                        'numero_tarjeta' => $cardNumber,
+                        'nombre_titular' => $cardName,
+                        'mes_exp'        => $mes_exp,
+                        'anio_exp'       => $anio_exp,
+                        'cvv'            => $cardCvv,
+                        'moneda'         => $currency,
+                    ]),
+                    CURLOPT_TIMEOUT        => 15,
+                    CURLOPT_SSL_VERIFYPEER => false,
+                ]);
+                $rawCheckout  = curl_exec($ch2);
+                $httpCheckout = curl_getinfo($ch2, CURLINFO_HTTP_CODE);
+                curl_close($ch2);
+                $resCheckout = json_decode($rawCheckout, true) ?? [];
+
+                if ($resCheckout['success'] ?? false) {
+                    $_SESSION['booking']['pago'] = $resCheckout['data']['pago'] ?? $resCheckout['data'] ?? [];
+                    $_SESSION['booking']['pago']['transaction_id'] = $resCheckout['data']['transaction_id'] ?? null;
+                    $_SESSION['booking']['payment_just_made'] = true;
+                } else {
+                    $_SESSION['booking']['pago'] = $resCreate['data'] ?? [];
+                    $_SESSION['booking']['pago']['_checkout_msg'] =
+                        ($resCheckout['message'] ?? '') . ' [HTTP ' . $httpCheckout . '] ' . substr($rawCheckout, 0, 200);
+                }
+            }
+        }
+    } else {
+        $_SESSION['booking']['pago'] = [
+            '_create_err' => 'Missing token/userId/notaryId — token:' . (!empty($token)?'ok':'MISSING')
+                . ' userId:' . ($userId ?? 'null')
+                . ' notaryId:' . ($notaryId ?? 'null'),
+        ];
+    }
+    header('Location: step5.php'); exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <title>Notarize — Pago Confirmado</title>
+  <title>Notarize — Pago</title>
   <?php include '../_head.php'; ?>
 </head>
 <body class="bg-white md:bg-slate-200 min-h-screen flex justify-center">
 <div class="w-full md:max-w-sm min-h-screen bg-slate-50 flex flex-col md:shadow-2xl relative">
 
-  <div class="bg-[#1e3a8a] px-5 py-4 sticky top-0 z-50 flex items-center gap-3">
-    <img src="../assets/LogoS2.png" alt="Notarize" class="h-11 w-auto brightness-0 invert">
-    <span class="text-white/50 text-xs ml-auto">5/6</span>
+  <div class="bg-[#1e3a8a] px-5 py-4 flex items-center gap-3">
+    <img src="../assets/LogoS2.png" alt="Notarize" class="h-11 w-auto">
+    <span class="text-white/50 text-xs ml-auto">4/5</span>
   </div>
 
-  <div class="flex-1 px-4 py-4 flex flex-col gap-3 overflow-y-auto">
+  <div class="flex-1 px-5 py-6 flex flex-col gap-5">
 
-    <?php
-    $checkoutMsg = $pago['_checkout_msg'] ?? null;
-    $createErr   = $pago['_create_err']   ?? null;
-    ?>
-    <?php if ($createErr): ?>
-      <div class="bg-red-50 border border-red-200 rounded-xl px-3 py-2 text-xs text-red-700 break-all inline-flex items-start gap-1.5">
-        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i>
-        <span>Error al crear el pago: <?= htmlspecialchars($createErr) ?></span>
-      </div>
-    <?php elseif ($checkoutMsg): ?>
-      <div class="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-xs text-amber-800 break-all inline-flex items-start gap-1.5">
-        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i>
-        <span>Checkout: <?= htmlspecialchars($checkoutMsg) ?></span>
+    <div>
+      <span class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full px-3 py-1.5 mb-3">
+        <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
+        <?= htmlspecialchars($service) ?>
+      </span>
+      <p class="text-sm font-bold text-blue-900 uppercase tracking-wide mb-1">Pago</p>
+      <h1 class="text-2xl font-extrabold text-slate-900 mb-1">Método de Pago</h1>
+      <p class="text-sm text-slate-500">Ingresa los datos de tu tarjeta para continuar</p>
+    </div>
+
+    <?php if ($error): ?>
+      <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+        <?= htmlspecialchars($error) ?>
       </div>
     <?php endif; ?>
 
-    <!-- Success icon + title compact -->
-    <div class="flex items-center gap-3">
-      <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
-      </div>
-      <div>
-        <p class="text-xs font-bold text-blue-900 uppercase tracking-wide mb-1">Pago Confirmado</p>
-        <h1 class="text-lg font-extrabold text-slate-900">¡Pago confirmado!</h1>
-        <p class="text-xs text-slate-500 mt-0.5">Tu servicio ha sido reservado con éxito.</p>
-      </div>
-    </div>
+    <!-- MÓDULO DE PAGO -->
+    <form method="POST" id="paymentForm" class="flex flex-col gap-4">
+      <input type="hidden" name="card_cvv_real" id="cardCvvReal" value="">
 
-    <!-- Notary card -->
-    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-      <div class="bg-slate-50 px-4 py-3 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-extrabold text-blue-700 text-sm shrink-0">
-            <?= strtoupper(substr($notaryName,0,1)) ?>
+      <!-- Visual card preview -->
+      <div class="relative bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 rounded-2xl p-5 shadow-xl shadow-blue-700/30 overflow-hidden aspect-[1.6/1]">
+        <div class="absolute -top-12 -right-12 w-40 h-40 bg-white/10 rounded-full"></div>
+        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-white/5 rounded-full"></div>
+        <div class="absolute top-1/2 right-6 w-20 h-20 bg-white/5 rounded-full"></div>
+
+        <div class="relative z-10 h-full flex flex-col justify-between text-white">
+          <div class="flex justify-between items-start">
+            <span class="text-white/70 text-[10px] font-semibold uppercase tracking-widest">Tarjeta de crédito</span>
+            <i data-lucide="contactless" class="w-6 h-6 text-white/70"></i>
           </div>
-          <div class="flex-1 min-w-0">
-            <p class="font-extrabold text-slate-900 text-sm truncate"><?= htmlspecialchars($notaryName) ?></p>
-            <?php if ($direccion): ?><p class="text-xs text-slate-400 truncate inline-flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 shrink-0"></i> <?= htmlspecialchars($direccion) ?></p><?php endif; ?>
+
+          <div class="flex items-center gap-2">
+            <div class="w-10 h-8 bg-gradient-to-br from-yellow-200 to-yellow-400 rounded-md flex items-center justify-center">
+              <div class="w-6 h-5 border border-yellow-600/40 rounded-sm grid grid-cols-3 gap-px p-0.5">
+                <div class="bg-yellow-600/40 rounded-sm"></div><div class="bg-yellow-600/40 rounded-sm"></div><div class="bg-yellow-600/40 rounded-sm"></div>
+                <div class="bg-yellow-600/40 rounded-sm"></div><div class="bg-yellow-600/40 rounded-sm"></div><div class="bg-yellow-600/40 rounded-sm"></div>
+                <div class="bg-yellow-600/40 rounded-sm"></div><div class="bg-yellow-600/40 rounded-sm"></div><div class="bg-yellow-600/40 rounded-sm"></div>
+              </div>
+            </div>
+          </div>
+
+          <p id="cardPreviewNumber" class="font-mono text-lg tracking-[0.18em] font-semibold">•••• •••• •••• ••••</p>
+
+          <div class="flex justify-between items-end gap-3">
+            <div class="min-w-0 flex-1">
+              <p class="text-white/60 text-[9px] uppercase tracking-wider mb-0.5">Titular</p>
+              <p id="cardPreviewName" class="text-sm font-semibold uppercase truncate">Tu nombre</p>
+            </div>
+            <div>
+              <p class="text-white/60 text-[9px] uppercase tracking-wider mb-0.5">Expira</p>
+              <p id="cardPreviewExp" class="text-sm font-semibold font-mono">MM/YY</p>
+            </div>
+            <span class="text-white font-extrabold italic text-lg shrink-0">VISA</span>
           </div>
         </div>
       </div>
-      <div class="px-4 py-3 flex flex-col gap-0">
-        <?php if ($horario): ?>
-          <div class="flex justify-between items-center py-2 border-b border-slate-50">
-            <span class="text-xs text-slate-400">Horario de oficina</span>
-            <span class="text-xs font-semibold text-slate-700"><?= htmlspecialchars($horario) ?></span>
+
+      <!-- Inputs -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
+        <div>
+          <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Número de tarjeta</label>
+          <input type="text" name="card_number" id="cardNumber" maxlength="19" inputmode="numeric" placeholder="1234 5678 9012 3456" required autocomplete="cc-number"
+            class="w-full border-[1.5px] border-slate-200 rounded-xl px-4 py-3 text-sm font-mono tracking-widest bg-slate-50 outline-none focus:border-blue-500 focus:bg-white transition">
+        </div>
+
+        <div>
+          <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Nombre del titular</label>
+          <input type="text" name="card_name" id="cardName" placeholder="Como aparece en la tarjeta" required autocomplete="cc-name"
+            class="w-full border-[1.5px] border-slate-200 rounded-xl px-4 py-3 text-sm uppercase bg-slate-50 outline-none focus:border-blue-500 focus:bg-white transition">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Expira</label>
+            <input type="text" name="card_exp" id="cardExp" maxlength="5" inputmode="numeric" placeholder="MM/YY" required autocomplete="cc-exp"
+              class="w-full border-[1.5px] border-slate-200 rounded-xl px-4 py-3 text-sm font-mono bg-slate-50 outline-none focus:border-blue-500 focus:bg-white transition">
           </div>
-        <?php endif; ?>
-        <div class="flex justify-between items-center py-2 border-b border-slate-50">
-          <span class="text-xs text-slate-400">Servicio</span>
-          <span class="text-xs font-semibold text-slate-700"><?= htmlspecialchars($service) ?></span>
+          <div>
+            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">CVV</label>
+            <input type="text" name="card_cvv" id="cardCvv" maxlength="4" inputmode="numeric" placeholder="123" required autocomplete="cc-csc"
+              class="w-full border-[1.5px] border-slate-200 rounded-xl px-4 py-3 text-sm font-mono bg-slate-50 outline-none focus:border-blue-500 focus:bg-white transition">
+          </div>
         </div>
-        <div class="flex justify-between items-center py-2 border-b border-slate-50">
-          <span class="text-xs text-slate-400">Cita</span>
-          <span class="text-xs font-semibold text-slate-700"><?= htmlspecialchars($date) ?> <?= htmlspecialchars($time) ?></span>
-        </div>
-        <div class="flex justify-between items-center py-2">
-          <span class="text-xs text-slate-400">Ubicación</span>
-          <span class="text-xs font-semibold text-slate-700"><?= $modLabel ?></span>
-        </div>
+
+        <p class="text-[10px] text-slate-400 text-center pt-1 inline-flex items-center justify-center gap-1 w-full">
+          <i data-lucide="lock" class="w-3 h-3"></i> Pago seguro · Demo: 4242 4242 4242 4242
+        </p>
       </div>
-    </div>
+    </form>
 
-    <!-- Payment detail card -->
-    <div class="bg-white rounded-2xl border border-slate-200">
-      <div class="px-4 pt-4 pb-3">
-        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Detalles del Pago</p>
-
-        <div class="flex justify-between items-center py-2.5 border-b border-slate-100">
-          <span class="text-sm text-slate-400">Factura #</span>
-          <span class="text-sm font-extrabold text-blue-700"><?= htmlspecialchars($invoice) ?></span>
-        </div>
-        <div class="flex justify-between items-center py-2.5 border-b border-slate-100">
-          <span class="text-sm text-slate-400">ID de Transacción</span>
-          <span class="text-xs font-mono font-bold text-slate-700"><?= htmlspecialchars($txId) ?></span>
-        </div>
-        <div class="flex justify-between items-center py-2.5 border-b border-slate-100">
-          <span class="text-sm text-slate-400">Fecha y hora</span>
-          <span class="text-sm font-semibold text-slate-700"><?= $paidAt ?></span>
-        </div>
-        <div class="flex justify-between items-center py-2.5 border-b border-slate-100">
-          <span class="text-sm text-slate-400">Estado</span>
-          <span class="text-sm font-extrabold text-green-600 inline-flex items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> Aprobado</span>
-        </div>
-
-        <!-- Price breakdown -->
-        <div class="flex justify-between items-center py-2.5 border-b border-slate-100">
-          <span class="text-sm text-slate-400">Tarifa del notario</span>
-          <span class="text-sm font-semibold text-slate-900"><?= $currency ?> <?= number_format($fee, 2) ?></span>
+    <!-- RESUMEN -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div class="px-5 py-3 border-b border-slate-100 flex items-center gap-2">
+        <i data-lucide="receipt" class="w-3.5 h-3.5 text-slate-400"></i>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Resumen</p>
+      </div>
+      <div class="px-5 py-3 space-y-1">
+        <?php foreach ([
+          ['Notario',   $notary['nombre'] ?? 'Notario'],
+          ['Servicio',  $service],
+          ['Fecha',     $date],
+          ['Hora',      $time],
+          ['Ubicación', $modalidad],
+        ] as [$lbl, $val]): ?>
+          <div class="flex justify-between items-center py-2.5 border-b border-slate-100 last:border-0 gap-3">
+            <span class="text-xs text-slate-500 shrink-0"><?= htmlspecialchars($lbl) ?></span>
+            <span class="text-xs font-semibold text-slate-900 text-right truncate"><?= htmlspecialchars($val) ?></span>
+          </div>
+        <?php endforeach; ?>
+      </div>
+      <div class="px-5 py-3 border-t border-slate-100 space-y-1.5">
+        <div class="flex justify-between items-center text-sm">
+          <span class="text-slate-500">Tarifa de consulta</span>
+          <span class="font-semibold text-slate-900"><?= $currency ?> <?= number_format($fee, 2) ?></span>
         </div>
         <?php if ($homeFee): ?>
-          <div class="flex justify-between items-center py-2.5 border-b border-slate-100">
-            <span class="text-sm text-slate-400 inline-flex items-center gap-1.5"><i data-lucide="home" class="w-3.5 h-3.5"></i> Cargo por visita a domicilio</span>
-            <span class="text-sm font-semibold text-orange-600">+ <?= $currency ?> <?= number_format($homeFee, 2) ?></span>
+          <div class="flex justify-between items-center text-sm">
+            <span class="text-slate-500 inline-flex items-center gap-1.5">
+              <i data-lucide="home" class="w-3.5 h-3.5"></i> Visita a domicilio
+            </span>
+            <span class="font-semibold text-slate-900"><?= $currency ?> <?= number_format($homeFee, 2) ?></span>
           </div>
         <?php endif; ?>
-        <div class="flex justify-between items-center pt-3">
-          <span class="font-extrabold text-slate-900">Total pagado</span>
-          <span class="text-lg font-extrabold text-blue-700"><?= $currency ?> <?= number_format($total, 2) ?></span>
-        </div>
+      </div>
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-5 py-4 flex justify-between items-center border-t border-blue-100">
+        <span class="font-extrabold text-slate-900">Total a pagar</span>
+        <span class="text-2xl font-extrabold text-blue-700"><?= $currency ?> <?= number_format($total, 2) ?></span>
       </div>
     </div>
 
   </div>
 
-  <!-- Sticky bottom button -->
-  <div class="sticky bottom-0 px-4 py-4 bg-white border-t border-slate-200">
-    <a href="step6.php"
-      class="w-full bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold text-center
-             rounded-2xl py-4 shadow-lg shadow-blue-700/30 transition block">
-      Ver Ruta →
+  <!-- Bottom action bar -->
+  <div class="bg-white border-t border-slate-200 px-4 py-4 flex gap-3">
+    <a href="step3.php"
+      class="px-5 py-4 border-[1.5px] border-slate-300 text-slate-600 font-semibold rounded-2xl text-sm hover:bg-slate-50 active:scale-95 transition whitespace-nowrap">
+      ← Atrás
     </a>
+    <button type="submit" form="paymentForm"
+      class="flex-1 bg-blue-700 hover:bg-blue-800 active:scale-95 text-white font-extrabold rounded-2xl py-4 shadow-lg shadow-blue-700/30 transition text-sm inline-flex items-center justify-center gap-1.5">
+      <i data-lucide="lock" class="w-4 h-4"></i>
+      Pagar <?= $currency ?> <?= number_format($total, 2) ?>
+    </button>
   </div>
 
   <?php include '../_nav.php'; ?>
 </div>
+
+<script>
+  (function () {
+    const cardNumber = document.getElementById('cardNumber');
+    const cardName   = document.getElementById('cardName');
+    const cardExp    = document.getElementById('cardExp');
+    const cardCvv    = document.getElementById('cardCvv');
+    const previewNum = document.getElementById('cardPreviewNumber');
+    const previewNm  = document.getElementById('cardPreviewName');
+    const previewEx  = document.getElementById('cardPreviewExp');
+
+    function formatNum(raw) {
+      const v = raw.replace(/\D/g, '').slice(0, 16);
+      return v.match(/.{1,4}/g)?.join(' ') ?? v;
+    }
+    cardNumber.addEventListener('input', e => {
+      const raw = e.target.value.replace(/\D/g, '').slice(0, 16);
+      e.target.value = raw.match(/.{1,4}/g)?.join(' ') ?? raw;
+      const padded = raw.padEnd(16, '•');
+      previewNum.textContent = padded.match(/.{1,4}/g).join(' ');
+    });
+    cardName.addEventListener('input', e => {
+      previewNm.textContent = e.target.value.toUpperCase() || 'Tu nombre';
+    });
+    cardExp.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 4);
+      if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+      e.target.value = v;
+      previewEx.textContent = v || 'MM/YY';
+    });
+    cardCvv.addEventListener('input', e => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    });
+  })();
+</script>
 </body>
 </html>
