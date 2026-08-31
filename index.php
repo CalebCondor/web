@@ -7,6 +7,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Notarizalo</title>
+  <link rel="preload" as="image" href="assets/poster.jpg" fetchpriority="high" />
+  <link rel="preload" as="video" href="assets/Fondo.mp4" type="video/mp4" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -33,7 +35,7 @@
       justify-content: center;
       background: #0f172a;
     }
-    .full-h { height: 100svh; }
+    .full-h { min-height: 100svh; }
     .bg-video {
       position: absolute;
       inset: 0;
@@ -55,9 +57,9 @@
 </head>
 
 <body class="bg-slate-900 md:bg-slate-200">
-<div class="w-full md:max-w-sm full-h flex flex-col md:shadow-2xl relative overflow-hidden">
+<div class="w-full md:max-w-sm full-h flex flex-col md:shadow-2xl relative overflow-hidden" style="background:#0f172a url('assets/poster.jpg') center/cover no-repeat">
 
-  <video class="bg-video" src="assets/Fondo.mp4" autoplay muted loop playsinline preload="auto"></video>
+  <video class="bg-video" src="assets/Fondo.mp4" poster="assets/poster.jpg" autoplay muted loop playsinline preload="auto" fetchpriority="high"></video>
   <div class="bg-overlay"></div>
 
   <!-- Logo -->
